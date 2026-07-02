@@ -37,6 +37,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_CDN_URL: https://cg13dev.github.io/cdn
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
