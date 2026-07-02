@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language } from './App';
 
@@ -164,6 +164,7 @@ const AUTHORS_DICT: Record<Language, Author[]> = {
 };
 
 const ITEMS_PER_PAGE = 6;
+const SWIPE_THRESHOLD_PX = 48;
 
 interface AuthorsScreenProps {
   onBack: () => void;
@@ -173,11 +174,23 @@ interface AuthorsScreenProps {
 export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const AUTHORS = AUTHORS_DICT[lang];
 
   const currentPage = Math.floor(selectedIndex / ITEMS_PER_PAGE);
   const totalPages = Math.ceil(AUTHORS.length / ITEMS_PER_PAGE);
+
+  const goToPage = useCallback((page: number) => {
+    const normalizedPage = (page + totalPages) % totalPages;
+    const nextIndex = Math.min(normalizedPage * ITEMS_PER_PAGE, AUTHORS.length - 1);
+    setSelectedIndex(nextIndex);
+  }, [AUTHORS.length, totalPages]);
+
+  const movePage = useCallback((direction: number) => {
+    if (totalPages < 2) return;
+    goToPage(currentPage + direction);
+  }, [currentPage, goToPage, totalPages]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -206,6 +219,24 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onBack, selectedIndex, showPopup, AUTHORS.length]);
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'touch' || showPopup) return;
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'touch' || showPopup || !pointerStartRef.current) return;
+
+    const deltaX = event.clientX - pointerStartRef.current.x;
+    const deltaY = event.clientY - pointerStartRef.current.y;
+    pointerStartRef.current = null;
+
+    if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < SWIPE_THRESHOLD_PX) return;
+    if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+    movePage(deltaX < 0 ? 1 : -1);
+  };
 
   const currentAuthors = AUTHORS.slice(
     currentPage * ITEMS_PER_PAGE,
@@ -240,6 +271,10 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className="absolute inset-0 bg-[#0d0d0d] flex flex-col justify-between overflow-hidden font-oswald select-none"
+      style={{ touchAction: 'none' }}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => { pointerStartRef.current = null; }}
     >
       {/* Top Section */}
       <div className={`pt-[8vh] px-[8vw] transition-opacity duration-300 ${showPopup ? 'opacity-30' : 'opacity-100'}`}>
@@ -324,18 +359,24 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
       </div>
 
       {/* Bottom Section */}
-      <div className={`pb-[6vh] px-[8vw] flex justify-between items-end transition-opacity duration-300 ${showPopup ? 'opacity-30' : 'opacity-100'}`}>
+      <div className={`pointer-events-none absolute inset-x-0 bottom-[6vh] z-10 px-[8vw] flex justify-between items-end transition-opacity duration-300 ${showPopup ? 'opacity-30' : 'opacity-100'}`}>
         {/* Pagination */}
-        <div className="font-oswald text-[2vh] tracking-widest">
+        <button
+          onClick={() => {
+            if (!showPopup) movePage(1);
+          }}
+          className="pointer-events-auto font-oswald text-[2.5vh] tracking-widest transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+          aria-label={lang === 'ru' ? 'Следующая страница авторов' : 'Next authors page'}
+        >
           <span className="text-[#9c1414]">{(currentPage + 1).toString().padStart(2, '0')}</span>
           <span className="text-[#444] mx-[0.5vw]">/</span>
           <span className="text-[#666]">{(totalPages).toString().padStart(2, '0')}</span>
-        </div>
+        </button>
 
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="group flex items-center gap-[1vw] text-[#666] hover:text-[#c0c0c0] transition-colors duration-300 focus:outline-none"
+          className="pointer-events-auto group flex items-center gap-[1vw] text-[#666] hover:text-[#c0c0c0] transition-colors duration-300 focus:outline-none"
         >
           <div className="border border-[#333] group-hover:border-[#666] px-[0.6vw] py-[0.2vh] text-[1.4vh] font-mono tracking-wider transition-colors duration-300">
             ESC
