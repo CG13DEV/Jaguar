@@ -107,11 +107,11 @@ export default function App() {
           </motion.div>
         )}
 
-        {currentScreen === 'history' && <HistoryScreen key="history" onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'gameplay' && <GameplayScreen key="gameplay" onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'technology' && <TechnologyScreen key="technology" onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'authors' && <AuthorsScreen key="authors" onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'socials' && <SocialsScreen key="socials" onBack={() => setCurrentScreen('main')} lang={lang} />}
+        {currentScreen === 'history' && <HistoryScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
+        {currentScreen === 'gameplay' && <GameplayScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
+        {currentScreen === 'technology' && <TechnologyScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
+        {currentScreen === 'authors' && <AuthorsScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
+        {currentScreen === 'socials' && <SocialsScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
       </AnimatePresence>
 
       {/* Language Switcher */}
@@ -133,4 +133,3 @@ export default function App() {
     </>
   );
 }
-
