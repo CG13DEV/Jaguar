@@ -50,9 +50,7 @@ const getMediaInterval = () => {
 };
 
 function useDiscoveredMedia(id: string): MediaItem[] {
-  const [items, setItems] = useState<MediaItem[]>([
-    { type: 'video', src: `/features/${id}_1.mp4` }
-  ]);
+  const [items, setItems] = useState<MediaItem[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -98,11 +96,7 @@ function useDiscoveredMedia(id: string): MediaItem[] {
         if (valid.length > 0) {
           setItems(valid.map(v => ({ type: v!.type as 'video'|'image', src: v!.src })));
         } else {
-          // Defaults if none found
-          setItems([
-            { type: 'video', src: `/features/${id}_1.mp4` },
-            { type: 'image', src: `/features/${id}_2.jpg` }
-          ]);
+          setItems([]);
         }
       }
     };
@@ -290,16 +284,18 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
     >
       {/* Background Media */}
       <AnimatePresence>
-        <motion.div
-          key={activeMedia.src}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0 z-0"
-        >
-          <BackgroundMedia media={activeMedia} />
-        </motion.div>
+        {activeMedia && (
+          <motion.div
+            key={activeMedia.src}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            className="absolute inset-0 z-0"
+          >
+            <BackgroundMedia media={activeMedia} />
+          </motion.div>
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
