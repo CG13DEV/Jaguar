@@ -394,14 +394,14 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-between px-[4vw]"
+            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-between px-[8vw]"
           >
             <button
               onClick={() => moveMedia(-1)}
-              className="pointer-events-auto flex h-[54px] w-[54px] items-center justify-center border border-[#444] bg-[#0d0d0d]/50 text-[#c8c8c8] backdrop-blur-sm transition-colors duration-300 hover:border-[#777] hover:text-white focus:outline-none"
+              className="pointer-events-auto flex h-[12vh] w-[5vw] min-w-[44px] items-center justify-center text-[#666] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
               aria-label={lang === 'ru' ? 'Предыдущий экран' : 'Previous screen'}
             >
-              <ChevronLeft size={28} strokeWidth={1.6} />
+              <ChevronLeft className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
             </button>
 
             <div className="pointer-events-auto absolute bottom-[5vh] left-1/2 flex -translate-x-1/2 items-center gap-3">
@@ -417,10 +417,10 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
 
             <button
               onClick={() => moveMedia(1)}
-              className="pointer-events-auto flex h-[54px] w-[54px] items-center justify-center border border-[#444] bg-[#0d0d0d]/50 text-[#c8c8c8] backdrop-blur-sm transition-colors duration-300 hover:border-[#777] hover:text-white focus:outline-none"
+              className="pointer-events-auto flex h-[12vh] w-[5vw] min-w-[44px] items-center justify-center text-[#666] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
               aria-label={lang === 'ru' ? 'Следующий экран' : 'Next screen'}
             >
-              <ChevronRight size={28} strokeWidth={1.6} />
+              <ChevronRight className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
             </button>
           </motion.div>
         )}
