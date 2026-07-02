@@ -1,20 +1,62 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Jaguar
 
-# Run and deploy your AI Studio app
+Интерактивный лендинг-проtotип в стиле кинематографичного геймплей-меню.
 
-This contains everything you need to run your app locally.
+Проект представляет собой React/Vite интерфейс с кинематографичной подачей, навигацией по клавишам и экранной презентацией истории, геймплея, технологий, авторов и социальных ссылок.
 
-View your app in AI Studio: https://ai.studio/apps/e154033d-d721-4cd2-88e4-43e2be9aed6f
+## ⚡ Ключевые фишки
 
-## Run Locally
+- Клавиатурная навигация по меню: `ArrowUp`, `ArrowDown`, `Enter`.
+- Две языковые версии: `RU` и `EN`.
+- Плавные переходы и анимации с `motion/react`.
+- Таймлайн в разделе `History` с интерактивным выбором событий.
+- Слайды с разделами `Gameplay`, `Technology` и `Authors`.
+- Ссылки на внешние ресурсы в `Socials`.
+- Основа на Vite + React + Tailwind CSS.
 
-**Prerequisites:**  Node.js
+## 🚀 Старт проекта
 
+```bash
+npm install
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+После запуска открой `http://localhost:3000`.
+
+## 🧱 Сборка и предпросмотр
+
+```bash
+npm run build
+npm run preview
+```
+
+## 🛠 Технологии
+
+- React 19
+- Vite 6
+- TypeScript
+- Tailwind CSS 4
+- motion/react
+- Express + dotenv (в зависимостях)
+
+## 📁 Структура
+
+- `src/App.tsx` — главный контроллер экранов и меню.
+- `src/HistoryScreen.tsx` — хронология с интерактивным таймлайном.
+- `src/GameplayScreen.tsx` — подборка ключевых механик.
+- `src/TechnologyScreen.tsx` — технологии и движок.
+- `src/AuthorsScreen.tsx` — стилизованный список команды.
+- `src/SocialsScreen.tsx` — внешние ссылки для запуска из интерфейса.
+- `src/FeatureScreen.tsx` — общий компонент для карточек функций.
+
+## 🔧 Переменные окружения
+
+- `VITE_CDN_URL` — если нужен базовый URL для загрузки ассетов, например `map.png`.
+
+## 💡 Идея
+
+Проект демонстрирует атмосферное меню для игрового или промо-сайта, где каждый раздел отображается как отдельный экран с эффектной подачей и удобной навигацией.
+
+---
+
+Если хочешь, могу добавить в README инструкции по деплою, ссылки на демо или структуру CSS/шрифтов.
