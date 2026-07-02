@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400&family=Russo+One&family=Playfair+Display:ital@0;1&family=Permanent+Marker&family=Syncopate:wght@400;700&family=UnifrakturMaguntia&family=Rajdhani:wght@300;400;500&family=Caveat:wght@400;700&display=swap');
+@import "tailwindcss";
+
+body {
+  background-color: #0d0d0d;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+@theme {
+  --font-oswald: "Oswald", sans-serif;
+  --font-russo: "Russo One", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-marker: "Permanent Marker", cursive;
+  --font-syncopate: "Syncopate", sans-serif;
+  --font-gothic: "UnifrakturMaguntia", cursive;
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --font-caveat: "Caveat", cursive;
+}
+

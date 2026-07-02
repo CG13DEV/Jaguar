@@ -1,0 +1,8 @@
+{
+  "name": "Yaguar Main Menu",
+  "description": "A pixel-perfect recreation of the Yaguar game main menu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
