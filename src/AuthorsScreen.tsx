@@ -79,12 +79,12 @@ const AUTHORS_DICT: Record<Language, Author[]> = {
     },
     {
       id: '8',
-      name: 'someone',
-      role: 'support',
-      description: 'Модератор сообщества и комьюнити-менеджер. Поддерживает связь с игроками.',
-      fontClass: 'font-sans',
+      name: 'Heinhain',
+      role: '',
+      description: 'Shit. Redo it.',
+      fontClass: 'font-penis-typography font-black',
       colorClass: 'text-[#666]',
-      sizeClass: 'text-[min(4.5vh,4vw)]',
+      sizeClass: 'text-[5.4vw] md:text-[min(8vh,9vw)]',
     }
   ],
   en: [
@@ -153,12 +153,12 @@ const AUTHORS_DICT: Record<Language, Author[]> = {
     },
     {
       id: '8',
-      name: 'someone',
-      role: 'support',
-      description: 'Community moderator and manager. Maintains communication with players.',
-      fontClass: 'font-sans',
+      name: 'Heinhain',
+      role: '',
+      description: 'Shit. Redo it.',
+      fontClass: 'font-penis-typography font-black',
       colorClass: 'text-[#666]',
-      sizeClass: 'text-[min(4.5vh,4vw)]',
+      sizeClass: 'text-[5.4vw] md:text-[min(8vh,9vw)]',
     }
   ]
 };
@@ -340,7 +340,7 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
                   >
                     {author.name && (
                       <>
-                        <div className={`mb-[1vh] ${author.fontClass} ${author.sizeClass} whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-[#9c1414] drop-shadow-[0_0_10px_rgba(156,20,20,0.5)]' : author.colorClass}`}>
+                        <div className={`mb-[1vh] max-w-[88%] text-center leading-none ${author.fontClass} ${author.sizeClass} whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-[#9c1414] drop-shadow-[0_0_10px_rgba(156,20,20,0.5)]' : author.colorClass}`}>
                           {author.name}
                         </div>
                         {author.role && (
@@ -395,44 +395,44 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 px-[5vw] py-[5vh] backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-[50vw] max-w-[800px] border border-[#333] bg-[#0a0a0a] p-[5vh] shadow-[0_0_50px_rgba(0,0,0,0.8)]"
+              className="relative max-h-[86vh] w-full max-w-[800px] overflow-y-auto border border-[#333] bg-[#0a0a0a] px-[6vw] py-[4vh] shadow-[0_0_50px_rgba(0,0,0,0.8)] md:w-[50vw] md:px-[5vh] md:py-[5vh]"
             >
               <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#9c1414] to-transparent"></div>
               
               <div className="flex flex-col items-center text-center">
-                <div className={`mb-[1vh] ${activeAuthor.fontClass} text-[#e0e0e0] ${activeAuthor.sizeClass}`}>
+                <div className={`mb-[1vh] max-w-full text-center leading-none ${activeAuthor.fontClass} text-[#e0e0e0] ${activeAuthor.sizeClass}`}>
                   {activeAuthor.name}
                 </div>
                 
                 {activeAuthor.role && (
-                  <div className="font-sans tracking-[0.3em] uppercase text-[1.6vh] text-[#9c1414] mb-[4vh]">
+                  <div className="mb-[3vh] max-w-full font-sans text-[1.5vh] uppercase tracking-[0.22em] text-[#9c1414] md:mb-[4vh] md:text-[1.6vh] md:tracking-[0.3em]">
                     {activeAuthor.role}
                   </div>
                 )}
                 
-                <div className="w-[20%] h-[1px] bg-[#333] mb-[4vh]"></div>
+                <div className="mb-[3vh] h-[1px] w-[28%] bg-[#333] md:mb-[4vh] md:w-[20%]"></div>
                 
-                <div className="font-sans text-[#a0a0a0] text-[2.2vh] font-light leading-[1.6] max-w-[80%] whitespace-pre-line">
+                <div className="max-w-full whitespace-pre-line break-words font-sans text-[1.9vh] font-light leading-[1.55] text-[#a0a0a0] md:max-w-[80%] md:text-[2.2vh]">
                   {activeAuthor.description}
                 </div>
               </div>
 
-              <div className="mt-[8vh] flex justify-center">
+              <div className="mt-[5vh] flex justify-center md:mt-[8vh]">
                 <button
                   onClick={() => setShowPopup(false)}
-                  className="group flex items-center gap-[1vw] text-[#666] hover:text-[#c0c0c0] transition-colors duration-300 focus:outline-none"
+                  className="group flex flex-wrap items-center justify-center gap-x-[2vw] gap-y-[1vh] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none md:gap-[1vw]"
                 >
-                  <div className="border border-[#333] group-hover:border-[#666] px-[0.6vw] py-[0.2vh] text-[1.4vh] font-mono tracking-wider transition-colors duration-300">
+                  <div className="border border-[#333] px-[2vw] py-[0.35vh] font-mono text-[1.25vh] tracking-wider transition-colors duration-300 group-hover:border-[#666] md:px-[0.6vw] md:py-[0.2vh] md:text-[1.4vh]">
                     ENTER / ESC
                   </div>
-                  <span className="font-oswald text-[2vh] uppercase tracking-wider">
+                  <span className="font-oswald text-[1.8vh] uppercase tracking-wider md:text-[2vh]">
                     {lang === 'ru' ? 'Закрыть' : 'Close'}
                   </span>
                 </button>
