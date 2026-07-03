@@ -434,7 +434,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
-            className="relative z-10 flex max-h-screen w-full flex-col items-center overflow-y-auto px-[6vw] pb-[14vh] pt-[8vh]"
+            className="relative z-10 flex h-full w-full flex-col items-center overflow-hidden px-[6vw] pb-[14vh] pt-[8vh]"
           >
             {/* Date */}
             <div className="text-[#a0a0a0] font-oswald text-[3.5vh] leading-none font-light" style={{ transform: 'scaleY(1.2)' }}>
@@ -465,7 +465,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
               })}
             </div>
 
-            <div className="flex w-full max-w-[760px] flex-col items-center text-center">
+            <div className="flex min-h-0 w-full max-w-[760px] flex-1 flex-col items-center text-center">
               <div className="font-oswald text-[4.8vh] leading-[1.05] text-[#d0d0d0] font-light tracking-wide sm:text-[6vh]" style={{ transform: 'scaleY(1.2)' }}>
                 {activeEvent.title}
               </div>
@@ -476,7 +476,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
                 {activeEvent.description}
               </div>
 
-              <div className="mt-[4vh] flex w-full flex-col gap-[2.8vh] text-left">
+              <div className="mt-[4vh] flex min-h-0 w-full flex-1 flex-col gap-[2.8vh] overflow-y-auto pr-[1.5vw] text-left">
                 <div className="border-t border-[#555] pt-[2vh]">
                   <div className="mb-[1vh] font-oswald text-[1.55vh] uppercase tracking-widest text-[#9c1414]">
                     {lang === 'ru' ? 'Описание уровня' : 'Level Description'}
