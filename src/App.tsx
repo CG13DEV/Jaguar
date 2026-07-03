@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from './Logo';
 import { HistoryScreen } from './HistoryScreen';
@@ -13,10 +13,22 @@ import { TechnologyScreen } from './TechnologyScreen';
 import { SocialsScreen } from './SocialsScreen';
 
 export type Language = 'ru' | 'en';
+type Screen = 'main' | 'history' | 'gameplay' | 'technology' | 'authors' | 'socials';
+
+const SCREENS_BY_MENU_INDEX: Screen[] = ['history', 'gameplay', 'technology', 'authors', 'socials'];
+
+const isScreen = (value: unknown): value is Screen => (
+  value === 'main' ||
+  value === 'history' ||
+  value === 'gameplay' ||
+  value === 'technology' ||
+  value === 'authors' ||
+  value === 'socials'
+);
 
 export default function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [currentScreen, setCurrentScreen] = useState('main');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('main');
   const [lang, setLang] = useState<Language>('ru');
 
   const menuItems = {
@@ -39,6 +51,28 @@ export default function App() {
   const currentMenu = menuItems[lang];
 
   useEffect(() => {
+    window.history.replaceState({ screen: 'main' }, '', window.location.href);
+
+    const handlePopState = (event: PopStateEvent) => {
+      const nextScreen = event.state && isScreen(event.state.screen) ? event.state.screen : 'main';
+      setCurrentScreen(nextScreen);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateToScreen = useCallback((screen: Screen) => {
+    setCurrentScreen(screen);
+    window.history.pushState({ screen }, '', window.location.href);
+  }, []);
+
+  const navigateBack = useCallback(() => {
+    if (currentScreen === 'main') return;
+    window.history.back();
+  }, [currentScreen]);
+
+  useEffect(() => {
     if (currentScreen !== 'main') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -47,17 +81,13 @@ export default function App() {
       } else if (e.key === 'ArrowDown') {
         setSelectedIndex((prev) => (prev < currentMenu.length - 1 ? prev + 1 : 0));
       } else if (e.key === 'Enter') {
-        if (selectedIndex === 0) setCurrentScreen('history');
-        if (selectedIndex === 1) setCurrentScreen('gameplay');
-        if (selectedIndex === 2) setCurrentScreen('technology');
-        if (selectedIndex === 3) setCurrentScreen('authors');
-        if (selectedIndex === 4) setCurrentScreen('socials');
+        navigateToScreen(SCREENS_BY_MENU_INDEX[selectedIndex]);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentScreen, selectedIndex, currentMenu.length]);
+  }, [currentScreen, selectedIndex, currentMenu.length, navigateToScreen]);
 
   return (
     <>
@@ -84,11 +114,7 @@ export default function App() {
                   onMouseEnter={() => setSelectedIndex(index)}
                   onClick={() => {
                     setSelectedIndex(index);
-                    if (index === 0) setCurrentScreen('history');
-                    if (index === 1) setCurrentScreen('gameplay');
-                    if (index === 2) setCurrentScreen('technology');
-                    if (index === 3) setCurrentScreen('authors');
-                    if (index === 4) setCurrentScreen('socials');
+                    navigateToScreen(SCREENS_BY_MENU_INDEX[index]);
                   }}
                   className={`text-left font-oswald text-[4.8vh] leading-[1.1] tracking-wide transition-colors duration-200 font-light ${
                     selectedIndex === index 
@@ -107,11 +133,11 @@ export default function App() {
           </motion.div>
         )}
 
-        {currentScreen === 'history' && <HistoryScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'gameplay' && <GameplayScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'technology' && <TechnologyScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'authors' && <AuthorsScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
-        {currentScreen === 'socials' && <SocialsScreen onBack={() => setCurrentScreen('main')} lang={lang} />}
+        {currentScreen === 'history' && <HistoryScreen onBack={navigateBack} lang={lang} />}
+        {currentScreen === 'gameplay' && <GameplayScreen onBack={navigateBack} lang={lang} />}
+        {currentScreen === 'technology' && <TechnologyScreen onBack={navigateBack} lang={lang} />}
+        {currentScreen === 'authors' && <AuthorsScreen onBack={navigateBack} lang={lang} />}
+        {currentScreen === 'socials' && <SocialsScreen onBack={navigateBack} lang={lang} />}
       </AnimatePresence>
 
       {/* Language Switcher */}
