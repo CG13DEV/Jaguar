@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, Images, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Images, Volume2, VolumeX, X } from 'lucide-react';
 import { Language } from './App';
 
 interface HistoryScreenProps {
@@ -20,7 +20,9 @@ const eventsDict = {
       year: '1995',
       date: '20 Января',
       title: 'Зиндан',
-      description: 'Тремя днями раньше Дрон сидит внизу,\nгде время течет по капле. Он находит щель,\nвыбирается наружу и почти верит дороге.\nНо между зинданом и парковкой остается провал.',
+      description: 'Дрона спустили под пол, там у них Зиндан, сидит там Шомпул, бля буду сам шомпул, сам.',
+      levelDescription: 'Уровень повествующий побег дрона из заточения. Уровень объединяющий ближний бой в первой половине, шутер во второй и побег на машине в конце. Игроку предстоит пройти через тесные коридоры, найти путь к выходу и понять, что произошло с Дроном.',
+      unlockCondition: 'Уровень открывается после прохождения Притона.',
       offsetDays: -3,
     },
     {
@@ -29,6 +31,7 @@ const eventsDict = {
       date: '23 Января',
       title: 'Ягуар',
       description: 'Белый ягуар в багажнике товар.\nБелый товар в целофане\nИ это не детское питание.',
+      levelDescription: 'Начало игры. Игроку предстоит управлять машиной, перевозить товар и избегать лишнего внимания. Уровень построен вокруг коротких остановок, звонков и взаимодействия с другими персонажами.',
       offsetDays: 0,
     },
     {
@@ -37,6 +40,8 @@ const eventsDict = {
       date: '24 Января',
       title: 'Стоянка',
       description: 'Выходим к стоянке\nРомчик хромает\nПодходим к машинам\nМеня ломает.',
+      levelDescription: 'Сцена встречи у машин. Игрок читает поведение Ромчика, проверяет багажники и переживает момент, в котором простая сделка превращается в личный счет.',
+      unlockCondition: 'Открывается после завершения уровня «Ягуар».',
       offsetDays: 1,
     },
     {
@@ -45,6 +50,8 @@ const eventsDict = {
       date: '25 Января',
       title: 'Кегельбан',
       description: 'Ромчик ждал в кегельбане\nВозможно там его бригаднички?',
+      levelDescription: 'Закрытое шумное место, где еще можно найти людей Ромчика. Уровень строится вокруг поиска бригадничков, коротких допросов и попытки понять, кто вел Дрона дальше.',
+      unlockCondition: 'Открывается после уровня «Стоянка».',
       offsetDays: 2,
     },
     {
@@ -53,6 +60,8 @@ const eventsDict = {
       date: '26 Января',
       title: 'Притон',
       description: 'Дрона видели в последний раз там в притоне.',
+      levelDescription: 'Грязный адрес, где след Дрона почти обрывается. Нужно осматривать комнаты, говорить с теми, кто видел слишком много, и собрать первые куски неизвестного промежутка.',
+      unlockCondition: 'Открывается после уровня «Стоянка».',
       offsetDays: 3,
     },
     {
@@ -61,6 +70,8 @@ const eventsDict = {
       date: '27 Января',
       title: 'Красный кирпичный дом',
       description: 'Входим без стука, ноги не вытираем, вынимаем стволы.',
+      levelDescription: 'Штурм дома: вход, коридоры, комнаты и быстрые решения. Это точка, где поиски Дрона окончательно становятся расплатой.',
+      unlockCondition: 'Открывается после уровня «Притон».',
       offsetDays: 4,
     },
     {
@@ -69,6 +80,8 @@ const eventsDict = {
       date: '28 Января',
       title: 'Декаданс',
       description: 'А все ли дома? Лицо жены хозяина нам знакомо.',
+      levelDescription: 'Дополнительный уровень, где игрок узнает больше о персонажах и их мотивах.',
+      unlockCondition: 'Открывается после завершения уровня «Кегельбан».',
       offsetDays: 5,
     }
   ],
@@ -78,7 +91,9 @@ const eventsDict = {
       year: '1995',
       date: 'January 20',
       title: 'Zindan',
-      description: 'Three days earlier, Dron is locked below,\nwhere time drips instead of moving. He finds a gap,\ngets outside, and almost believes in the road.\nBetween the pit and the parking lot, something is missing.',
+      description: 'Dron was dropped under the floor. They have a zindan down there. Shompul is sitting there. I swear, I will be Shompul myself. Myself.',
+      levelDescription: 'A level about Dron escaping captivity. It combines close combat in the first half, shooter gameplay in the second, and a car escape at the end. The player has to move through tight corridors, find a way out, and understand what happened to Dron.',
+      unlockCondition: 'Unlocked after completing the Den level.',
       offsetDays: -3,
     },
     {
@@ -87,6 +102,7 @@ const eventsDict = {
       date: 'January 23',
       title: 'Jaguar',
       description: 'White Jaguar, goods in the trunk.\nWhite goods wrapped in cellophane.\nAnd this is not baby food.',
+      levelDescription: 'The beginning of the game. The player drives the car, transports the goods, and avoids unwanted attention. The level is built around short stops, phone calls, and interactions with other characters.',
       offsetDays: 0,
     },
     {
@@ -95,6 +111,8 @@ const eventsDict = {
       date: 'January 24',
       title: 'Parking Lot',
       description: 'We step out to the parking lot.\nRomchik is limping.\nWe walk up to the cars.\nSomething breaks inside me.',
+      levelDescription: 'The meeting by the cars. The player reads Romchik\'s behavior, checks the trunks, and lives through the moment when a simple deal turns into a personal debt.',
+      unlockCondition: 'Unlocked after completing the Jaguar level.',
       offsetDays: 1,
     },
     {
@@ -103,6 +121,8 @@ const eventsDict = {
       date: 'January 25',
       title: 'Bowling Alley',
       description: 'Romchik was waiting at the bowling alley.\nMaybe his brigade boys are there?',
+      levelDescription: 'A closed, noisy place where Romchik\'s people may still be found. The level is built around finding his brigade boys, pushing through short interrogations, and learning where Dron was taken next.',
+      unlockCondition: 'Unlocked after the Parking Lot level.',
       offsetDays: 2,
     },
     {
@@ -111,6 +131,8 @@ const eventsDict = {
       date: 'January 26',
       title: 'Den',
       description: 'Dron was last seen there, in the den.',
+      levelDescription: 'A filthy address where Dron\'s trail almost dies. Search the rooms, talk to people who saw too much, and collect the first pieces of the missing interval.',
+      unlockCondition: 'Unlocked after the Parking Lot level.',
       offsetDays: 3,
     },
     {
@@ -119,6 +141,8 @@ const eventsDict = {
       date: 'January 27',
       title: 'Red Brick House',
       description: 'We enter without knocking, do not wipe our feet, and pull out the guns.',
+      levelDescription: 'The assault on the house: entrance, corridors, rooms, and quick decisions. This is where the search for Dron fully turns into payback.',
+      unlockCondition: 'Unlocked after the Den level.',
       offsetDays: 4,
     },
     {
@@ -127,6 +151,8 @@ const eventsDict = {
       date: 'January 28',
       title: 'Decadence',
       description: "Is everybody home? The host's wife's face looks familiar.",
+      levelDescription: 'An additional level where the player learns more about the characters and their motivations.',
+      unlockCondition: 'Unlocked after completing the Bowling Alley level.',
       offsetDays: 5,
     }
   ]
@@ -134,14 +160,8 @@ const eventsDict = {
 
 const TIMELINE_START_POSITION = 50;
 const TIMELINE_DAY_STEP = 10;
-const DEFAULT_MEDIA_INTERVAL_MS = 6000;
 
 const getEventPosition = (offsetDays: number) => TIMELINE_START_POSITION + offsetDays * TIMELINE_DAY_STEP;
-
-const getMediaInterval = () => {
-  const value = Number(import.meta.env.VITE_FEATURE_MEDIA_INTERVAL_MS);
-  return Number.isFinite(value) && value >= 1000 ? value : DEFAULT_MEDIA_INTERVAL_MS;
-};
 
 const checkMediaFile = (url: string, isVideo: boolean) => new Promise<boolean>((resolve) => {
   if (isVideo) {
@@ -211,13 +231,20 @@ function useDiscoveredStoryMedia(id: string): MediaItem[] {
   return items;
 }
 
-const EventMedia = ({ media }: { media: MediaItem }) => {
+const EventMedia = ({ media, isMuted }: { media: MediaItem; isMuted: boolean }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const cdnBase = import.meta.env.VITE_CDN_URL || '';
   const src = cdnBase ? `${cdnBase}${media.src}` : media.src;
+
+  useEffect(() => {
+    if (media.type !== 'video') return;
+    videoRef.current?.play().catch(() => {});
+  }, [isMuted, media.src, media.type]);
 
   if (media.type === 'video') {
     return (
       <motion.video
+        ref={videoRef}
         key={media.src}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -225,8 +252,9 @@ const EventMedia = ({ media }: { media: MediaItem }) => {
         transition={{ duration: 0.8 }}
         autoPlay
         loop
-        muted
+        muted={isMuted}
         playsInline
+        onCanPlay={(event) => { event.currentTarget.play().catch(() => {}); }}
         className="absolute inset-0 h-full w-full object-cover"
         src={src}
       />
@@ -251,12 +279,27 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
   const [selectedEventIndex, setSelectedEventIndex] = useState(1);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isDemoMuted, setIsDemoMuted] = useState(false);
   const events = eventsDict[lang];
   const activeEvent = events[selectedEventIndex];
   const mediaItems = useDiscoveredStoryMedia(activeEvent.id);
   const activeMedia = mediaItems[mediaIndex] || mediaItems[0];
-  const hasGallery = mediaItems.length > 1;
-  const mediaAutoAdvanceMs = getMediaInterval();
+  const hasDemo = mediaItems.length > 0;
+  const hasMultipleMedia = mediaItems.length > 1;
+
+  const openDemo = useCallback(() => {
+    if (!hasDemo) return;
+    setIsDemoMuted(false);
+    setIsGalleryOpen(true);
+  }, [hasDemo]);
+
+  const toggleDemo = useCallback(() => {
+    if (isGalleryOpen) {
+      setIsGalleryOpen(false);
+    } else {
+      openDemo();
+    }
+  }, [isGalleryOpen, openDemo]);
 
   const moveMedia = useCallback((direction: number) => {
     setMediaIndex(prev => {
@@ -268,29 +311,20 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
   useEffect(() => {
     setMediaIndex(0);
     setIsGalleryOpen(false);
+    setIsDemoMuted(false);
   }, [selectedEventIndex]);
 
   useEffect(() => {
-    if (!hasGallery && isGalleryOpen) {
+    if (!hasDemo && isGalleryOpen) {
       setIsGalleryOpen(false);
     }
-  }, [hasGallery, isGalleryOpen]);
+  }, [hasDemo, isGalleryOpen]);
 
   useEffect(() => {
     if (mediaIndex >= mediaItems.length) {
       setMediaIndex(0);
     }
   }, [mediaIndex, mediaItems.length]);
-
-  useEffect(() => {
-    if (isGalleryOpen || mediaItems.length < 2) return;
-
-    const intervalId = window.setInterval(() => {
-      setMediaIndex(prev => (prev + 1) % mediaItems.length);
-    }, mediaAutoAdvanceMs);
-
-    return () => window.clearInterval(intervalId);
-  }, [isGalleryOpen, mediaAutoAdvanceMs, mediaItems.length]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -313,15 +347,15 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
           setSelectedEventIndex((prev) => (prev < events.length - 1 ? prev + 1 : prev));
         }
       } else if (e.key === 'Enter') {
-        if (hasGallery) {
-          setIsGalleryOpen(true);
+        if (hasDemo) {
+          openDemo();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGalleryOpen, moveMedia, onBack, events.length, hasGallery]);
+  }, [isGalleryOpen, moveMedia, onBack, events.length, hasDemo, openDemo]);
 
   const cdnBase = import.meta.env.VITE_CDN_URL || '';
   const mapUrl = cdnBase ? `${cdnBase}/map.png` : '/map.png';
@@ -340,7 +374,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
       }}
     >
       <AnimatePresence>
-        {activeMedia && (
+        {isGalleryOpen && activeMedia && (
           <motion.div
             key={activeMedia.src}
             initial={{ opacity: 0 }}
@@ -349,7 +383,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
             transition={{ duration: 0.8 }}
             className="absolute inset-0 z-0"
           >
-            <EventMedia media={activeMedia} />
+            <EventMedia media={activeMedia} isMuted={isDemoMuted} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -358,11 +392,11 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
       <div className="absolute bottom-0 left-0 right-0 h-[35%] bg-gradient-to-t from-[#0d0d0d] via-[#0d0d0d]/80 to-transparent pointer-events-none"></div>
       <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-[#0d0d0d] via-[#0d0d0d]/80 to-transparent pointer-events-none"></div>
 
-      {hasGallery && (
+      {hasDemo && (
         <button
-          onClick={() => setIsGalleryOpen(prev => !prev)}
+          onClick={toggleDemo}
           className="group absolute left-[8vw] top-[6vh] z-30 flex items-center gap-[1vw] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
-          aria-label={isGalleryOpen ? (lang === 'ru' ? 'Закрыть галерею' : 'Close gallery') : (lang === 'ru' ? 'Открыть галерею' : 'Open gallery')}
+          aria-label={isGalleryOpen ? (lang === 'ru' ? 'Закрыть демо' : 'Close demo') : (lang === 'ru' ? 'Открыть демо' : 'Open demo')}
         >
           {isGalleryOpen ? (
             <X className="h-[2.5vh] w-[2.5vh]" strokeWidth={1.8} />
@@ -370,7 +404,24 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
             <Images className="h-[2.5vh] w-[2.5vh]" strokeWidth={1.8} />
           )}
           <span className="font-oswald text-[2.5vh] uppercase tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-            {isGalleryOpen ? (lang === 'ru' ? 'Закрыть' : 'Close') : (lang === 'ru' ? 'Галерея' : 'Gallery')}
+            {isGalleryOpen ? (lang === 'ru' ? 'Закрыть' : 'Close') : (lang === 'ru' ? 'Демо' : 'Demo')}
+          </span>
+        </button>
+      )}
+
+      {isGalleryOpen && activeMedia?.type === 'video' && (
+        <button
+          onClick={() => setIsDemoMuted(prev => !prev)}
+          className="group absolute right-[8vw] top-[12vh] z-30 flex items-center gap-[1vw] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+          aria-label={isDemoMuted ? (lang === 'ru' ? 'Включить звук' : 'Turn sound on') : (lang === 'ru' ? 'Выключить звук' : 'Turn sound off')}
+        >
+          {isDemoMuted ? (
+            <VolumeX className="h-[2.5vh] w-[2.5vh]" strokeWidth={1.8} />
+          ) : (
+            <Volume2 className="h-[2.5vh] w-[2.5vh]" strokeWidth={1.8} />
+          )}
+          <span className="font-oswald text-[2.5vh] uppercase tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {isDemoMuted ? (lang === 'ru' ? 'Звук' : 'Sound') : (lang === 'ru' ? 'Без звука' : 'Mute')}
           </span>
         </button>
       )}
@@ -383,7 +434,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
-            className="relative z-10 w-full flex flex-col items-center pt-[8vh]"
+            className="relative z-10 flex max-h-screen w-full flex-col items-center overflow-y-auto px-[6vw] pb-[14vh] pt-[8vh]"
           >
             {/* Date */}
             <div className="text-[#a0a0a0] font-oswald text-[3.5vh] leading-none font-light" style={{ transform: 'scaleY(1.2)' }}>
@@ -394,7 +445,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
             </div>
 
             {/* Timeline */}
-            <div className="relative w-[50%] h-[1px] bg-[#555] mt-[6vh] mb-[6vh] flex items-center">
+            <div className="relative mt-[5vh] mb-[5vh] flex h-[1px] w-full max-w-[760px] min-w-[260px] items-center bg-[#555]">
               {events.map((ev, idx) => {
                 const isActive = idx === selectedEventIndex;
                 return (
@@ -414,24 +465,45 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
               })}
             </div>
 
-            {/* Title */}
-            <div className="font-oswald text-[6vh] text-[#d0d0d0] font-light mb-[4vh] tracking-wide" style={{ transform: 'scaleY(1.2)' }}>
-              {activeEvent.title}
-            </div>
-
-            {/* Separator */}
-            <div className="w-[35%] h-[1px] bg-[#555] mb-[4vh]"></div>
-
-            {/* Description */}
-            <div className="text-white font-sans font-medium text-center leading-[1.4] whitespace-pre-line text-[2.2vh] max-w-[40%] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {activeEvent.description}
+            <div className="flex w-full max-w-[760px] flex-col items-center text-center">
+              <div className="font-oswald text-[4.8vh] leading-[1.05] text-[#d0d0d0] font-light tracking-wide sm:text-[6vh]" style={{ transform: 'scaleY(1.2)' }}>
+                {activeEvent.title}
               </div>
+
+              <div className="mt-[3vh] h-[1px] w-full max-w-[420px] bg-gradient-to-r from-transparent via-[#9c1414] to-transparent"></div>
+
+              <div className="mt-[3vh] whitespace-pre-line text-center font-sans text-[2.05vh] font-medium leading-[1.45] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-[2.15vh]">
+                {activeEvent.description}
+              </div>
+
+              <div className="mt-[4vh] flex w-full flex-col gap-[2.8vh] text-left">
+                <div className="border-t border-[#555] pt-[2vh]">
+                  <div className="mb-[1vh] font-oswald text-[1.55vh] uppercase tracking-widest text-[#9c1414]">
+                    {lang === 'ru' ? 'Описание уровня' : 'Level Description'}
+                  </div>
+                  <div className="font-sans text-[1.8vh] leading-[1.5] text-[#e0e0e0] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-[1.85vh]">
+                    {activeEvent.levelDescription}
+                  </div>
+                </div>
+
+                {activeEvent.unlockCondition && (
+                  <div className="border-t border-[#555] pt-[2vh]">
+                    <div className="mb-[1vh] font-oswald text-[1.55vh] uppercase tracking-widest text-[#9c1414]">
+                      {lang === 'ru' ? 'Разблокировка' : 'Unlock Condition'}
+                    </div>
+                    <div className="font-sans text-[1.8vh] leading-[1.5] text-[#e0e0e0] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:text-[1.85vh]">
+                      {activeEvent.unlockCondition}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {isGalleryOpen && (
+        {isGalleryOpen && activeMedia && (
           <motion.div
             key="event-gallery-controls"
             initial={{ opacity: 0 }}
@@ -440,32 +512,36 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
             transition={{ duration: 0.25 }}
             className="pointer-events-none absolute inset-0 z-20 flex items-center justify-between px-[8vw]"
           >
-            <button
-              onClick={() => moveMedia(-1)}
-              className="pointer-events-auto flex h-[12vh] w-[5vw] min-w-[44px] items-center justify-center text-[#666] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
-              aria-label={lang === 'ru' ? 'Предыдущий кадр' : 'Previous frame'}
-            >
-              <ChevronLeft className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
-            </button>
-
-            <div className="pointer-events-auto absolute bottom-[5vh] left-1/2 flex -translate-x-1/2 items-center gap-3">
-              {mediaItems.map((_, idx) => (
+            {hasMultipleMedia && (
+              <>
                 <button
-                  key={idx}
-                  onClick={() => setMediaIndex(idx)}
-                  className={`h-[10px] rounded-full transition-all duration-300 focus:outline-none ${idx === mediaIndex ? 'w-[34px] bg-[#9c1414] shadow-[0_0_10px_rgba(156,20,20,0.8)]' : 'w-[10px] bg-[#555] hover:bg-[#777]'}`}
-                  aria-label={`${lang === 'ru' ? 'Кадр' : 'Frame'} ${idx + 1}`}
-                />
-              ))}
-            </div>
+                  onClick={() => moveMedia(-1)}
+                  className="pointer-events-auto flex h-[12vh] w-[5vw] min-w-[44px] items-center justify-center text-[#666] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+                  aria-label={lang === 'ru' ? 'Предыдущий кадр' : 'Previous frame'}
+                >
+                  <ChevronLeft className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
+                </button>
 
-            <button
-              onClick={() => moveMedia(1)}
-              className="pointer-events-auto flex h-[12vh] w-[5vw] min-w-[44px] items-center justify-center text-[#666] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
-              aria-label={lang === 'ru' ? 'Следующий кадр' : 'Next frame'}
-            >
-              <ChevronRight className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
-            </button>
+                <div className="pointer-events-auto absolute bottom-[5vh] left-1/2 flex -translate-x-1/2 items-center gap-3">
+                  {mediaItems.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setMediaIndex(idx)}
+                      className={`h-[10px] rounded-full transition-all duration-300 focus:outline-none ${idx === mediaIndex ? 'w-[34px] bg-[#9c1414] shadow-[0_0_10px_rgba(156,20,20,0.8)]' : 'w-[10px] bg-[#555] hover:bg-[#777]'}`}
+                      aria-label={`${lang === 'ru' ? 'Кадр' : 'Frame'} ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => moveMedia(1)}
+                  className="pointer-events-auto flex h-[12vh] w-[5vw] min-w-[44px] items-center justify-center text-[#666] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+                  aria-label={lang === 'ru' ? 'Следующий кадр' : 'Next frame'}
+                >
+                  <ChevronRight className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
+                </button>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
