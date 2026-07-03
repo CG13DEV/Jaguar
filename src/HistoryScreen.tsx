@@ -279,7 +279,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
   const [selectedEventIndex, setSelectedEventIndex] = useState(1);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [isDemoMuted, setIsDemoMuted] = useState(false);
+  const [isDemoMuted, setIsDemoMuted] = useState(true);
   const events = eventsDict[lang];
   const activeEvent = events[selectedEventIndex];
   const mediaItems = useDiscoveredStoryMedia(activeEvent.id);
@@ -289,7 +289,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
 
   const openDemo = useCallback(() => {
     if (!hasDemo) return;
-    setIsDemoMuted(false);
+    setIsDemoMuted(true);
     setIsGalleryOpen(true);
   }, [hasDemo]);
 
@@ -311,7 +311,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
   useEffect(() => {
     setMediaIndex(0);
     setIsGalleryOpen(false);
-    setIsDemoMuted(false);
+    setIsDemoMuted(true);
   }, [selectedEventIndex]);
 
   useEffect(() => {
@@ -412,7 +412,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
       {isGalleryOpen && activeMedia?.type === 'video' && (
         <button
           onClick={() => setIsDemoMuted(prev => !prev)}
-          className="group absolute right-[8vw] top-[12vh] z-30 flex items-center gap-[1vw] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+          className="group absolute bottom-[5vh] left-1/2 z-30 flex -translate-x-1/2 items-center gap-[1vw] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
           aria-label={isDemoMuted ? (lang === 'ru' ? 'Включить звук' : 'Turn sound on') : (lang === 'ru' ? 'Выключить звук' : 'Turn sound off')}
         >
           {isDemoMuted ? (
@@ -522,7 +522,7 @@ export function HistoryScreen({ onBack, lang }: HistoryScreenProps) {
                   <ChevronLeft className="h-[6vh] w-[6vh]" strokeWidth={1.15} />
                 </button>
 
-                <div className="pointer-events-auto absolute bottom-[5vh] left-1/2 flex -translate-x-1/2 items-center gap-3">
+                <div className={`pointer-events-auto absolute left-1/2 flex -translate-x-1/2 items-center gap-3 ${activeMedia.type === 'video' ? 'bottom-[11vh]' : 'bottom-[5vh]'}`}>
                   {mediaItems.map((_, idx) => (
                     <button
                       key={idx}
