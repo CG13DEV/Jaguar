@@ -362,10 +362,10 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.4 }}
-                className="flex flex-col items-center w-full max-w-[55vw]"
+                className="flex flex-col items-center w-full max-w-[88vw] md:max-w-[55vw]"
               >
                 {/* SubFeature Title */}
-                <div className="font-sans text-[2.5vh] text-[#9c1414] font-medium tracking-widest uppercase mb-[3vh]">
+                <div className="w-full text-center font-sans text-[2.5vh] text-[#9c1414] font-medium tracking-[0.18em] md:tracking-widest uppercase mb-[3vh] leading-[1.35] break-words">
                   {activeSubFeature.title}
                 </div>
 
