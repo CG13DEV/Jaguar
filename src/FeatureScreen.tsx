@@ -43,6 +43,8 @@ const checkMediaFile = (url: string, isVideo: boolean) => new Promise<boolean>((
 
 const DEFAULT_MEDIA_INTERVAL_MS = 6000;
 const SWIPE_THRESHOLD_PX = 48;
+const WHEEL_THRESHOLD_PX = 36;
+const WHEEL_COOLDOWN_MS = 420;
 
 const getMediaInterval = () => {
   const value = Number(import.meta.env.VITE_FEATURE_MEDIA_INTERVAL_MS);
@@ -149,6 +151,7 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
   const [mediaIndex, setMediaIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const wheelLockUntilRef = useRef(0);
   const mediaAutoAdvanceMs = getMediaInterval();
 
   useEffect(() => {
@@ -270,6 +273,26 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
     }
   };
 
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const dominantDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+    if (Math.abs(dominantDelta) < WHEEL_THRESHOLD_PX) return;
+
+    const now = Date.now();
+    if (now < wheelLockUntilRef.current) return;
+    wheelLockUntilRef.current = now + WHEEL_COOLDOWN_MS;
+
+    if (isGalleryOpen) {
+      moveMedia(dominantDelta > 0 ? 1 : -1);
+      return;
+    }
+
+    if (Math.abs(event.deltaY) >= Math.abs(event.deltaX)) {
+      moveSubFeature(event.deltaY > 0 ? 1 : -1);
+    } else {
+      moveGroup(event.deltaX > 0 ? 1 : -1);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -281,6 +304,7 @@ export function FeatureScreen({ groups, onBack, lang = 'ru' }: FeatureScreenProp
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={() => { pointerStartRef.current = null; }}
+      onWheel={handleWheel}
     >
       {/* Background Media */}
       <AnimatePresence>
