@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Language } from './App';
 
 interface Author {
@@ -85,6 +86,15 @@ const AUTHORS_DICT: Record<Language, Author[]> = {
       fontClass: 'font-penis-typography font-black',
       colorClass: 'text-[#666]',
       sizeClass: 'text-[5.4vw] md:text-[min(8vh,9vw)]',
+    },
+    {
+      id: '9',
+      name: 'лучший',
+      role: 'КОФЕЧАТ',
+      description: 'Неоценимая моральная поддержка\nCoffetea | Andy | Roman | noob | Ivan Kurulyuk\nEvgeny Cherevichki | Kirill Z | Hacker | Lenik',
+      fontClass: 'font-syncopate uppercase tracking-[0.14em] font-bold',
+      colorClass: 'text-[#b0b0b0]',
+      sizeClass: 'text-[3.8vw] md:text-[min(4.8vh,4.2vw)]',
     }
   ],
   en: [
@@ -159,6 +169,15 @@ const AUTHORS_DICT: Record<Language, Author[]> = {
       fontClass: 'font-penis-typography font-black',
       colorClass: 'text-[#666]',
       sizeClass: 'text-[5.4vw] md:text-[min(8vh,9vw)]',
+    },
+    {
+      id: '9',
+      name: 'the best',
+      role: 'COFFECHAT',
+      description: 'Priceless moral support\nCoffetea | Andy | Roman | noob | Ivan Kurulyuk\nEvgeny Cherevichki | Kirill Z | Hacker | Lenik',
+      fontClass: 'font-syncopate uppercase tracking-[0.14em] font-bold',
+      colorClass: 'text-[#b0b0b0]',
+      sizeClass: 'text-[3.8vw] md:text-[min(4.8vh,4.2vw)]',
     }
   ]
 };
@@ -174,6 +193,7 @@ interface AuthorsScreenProps {
 export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [isPagePickerOpen, setIsPagePickerOpen] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const AUTHORS = AUTHORS_DICT[lang];
@@ -185,12 +205,19 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
     const normalizedPage = (page + totalPages) % totalPages;
     const nextIndex = Math.min(normalizedPage * ITEMS_PER_PAGE, AUTHORS.length - 1);
     setSelectedIndex(nextIndex);
+    setIsPagePickerOpen(false);
   }, [AUTHORS.length, totalPages]);
 
   const movePage = useCallback((direction: number) => {
     if (totalPages < 2) return;
     goToPage(currentPage + direction);
   }, [currentPage, goToPage, totalPages]);
+
+  useEffect(() => {
+    if (showPopup) {
+      setIsPagePickerOpen(false);
+    }
+  }, [showPopup]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -290,7 +317,31 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
       </div>
 
       {/* Grid Section */}
-      <div className={`flex-1 flex items-center justify-center px-[8vw] transition-opacity duration-300 ${showPopup ? 'opacity-30' : 'opacity-100'}`}>
+      <div className={`relative flex-1 flex items-center justify-center px-[8vw] transition-opacity duration-300 ${showPopup ? 'opacity-30' : 'opacity-100'}`}>
+        {totalPages > 1 && (
+          <>
+            <button
+              onClick={() => {
+                if (!showPopup) movePage(-1);
+              }}
+              className="absolute left-[2vw] top-1/2 z-20 flex h-[12vh] w-[6vw] min-w-[38px] -translate-y-1/2 items-center justify-center text-[#555] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+              aria-label={lang === 'ru' ? 'Предыдущая страница авторов' : 'Previous authors page'}
+            >
+              <ChevronLeft className="h-[5vh] w-[5vh]" strokeWidth={1.15} />
+            </button>
+
+            <button
+              onClick={() => {
+                if (!showPopup) movePage(1);
+              }}
+              className="absolute right-[2vw] top-1/2 z-20 flex h-[12vh] w-[6vw] min-w-[38px] -translate-y-1/2 items-center justify-center text-[#555] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+              aria-label={lang === 'ru' ? 'Следующая страница авторов' : 'Next authors page'}
+            >
+              <ChevronRight className="h-[5vh] w-[5vh]" strokeWidth={1.15} />
+            </button>
+          </>
+        )}
+
         <div className="w-full h-[50vh] grid grid-cols-3 grid-rows-2 relative">
           
           {/* Vertical Separators */}
@@ -361,17 +412,70 @@ export function AuthorsScreen({ onBack, lang }: AuthorsScreenProps) {
       {/* Bottom Section */}
       <div className={`pointer-events-none absolute inset-x-0 bottom-[6vh] z-10 px-[8vw] flex justify-between items-end transition-opacity duration-300 ${showPopup ? 'opacity-30' : 'opacity-100'}`}>
         {/* Pagination */}
-        <button
-          onClick={() => {
-            if (!showPopup) movePage(1);
-          }}
-          className="pointer-events-auto font-oswald text-[2.5vh] tracking-widest transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
-          aria-label={lang === 'ru' ? 'Следующая страница авторов' : 'Next authors page'}
-        >
-          <span className="text-[#9c1414]">{(currentPage + 1).toString().padStart(2, '0')}</span>
-          <span className="text-[#444] mx-[0.5vw]">/</span>
-          <span className="text-[#666]">{(totalPages).toString().padStart(2, '0')}</span>
-        </button>
+        <div className="pointer-events-auto flex items-center font-oswald text-[2.5vh] tracking-widest">
+          <AnimatePresence mode="wait" initial={false}>
+            {isPagePickerOpen && totalPages > 1 ? (
+              <motion.div
+                key="page-picker"
+                initial={{ opacity: 0, scaleX: 0.72 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                exit={{ opacity: 0, scaleX: 0.72 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className="flex origin-left items-center overflow-hidden"
+              >
+                {Array.from({ length: totalPages }, (_, index) => {
+                  const isActivePage = index === currentPage;
+                  return (
+                    <React.Fragment key={index}>
+                      <button
+                        onClick={() => goToPage(index)}
+                        className={`transition-colors duration-300 focus:outline-none ${isActivePage ? 'text-[#9c1414]' : 'text-[#666] hover:text-[#c0c0c0]'}`}
+                        aria-label={`${lang === 'ru' ? 'Страница' : 'Page'} ${index + 1}`}
+                      >
+                        {(index + 1).toString().padStart(2, '0')}
+                      </button>
+                      {index < totalPages - 1 && (
+                        <span className="mx-[0.7vw] text-[#444]">|</span>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="page-counter"
+                initial={{ opacity: 0, scaleX: 0.72 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                exit={{ opacity: 0, scaleX: 0.72 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className="flex origin-left items-center overflow-hidden"
+              >
+                <button
+                  onClick={() => {
+                    if (!showPopup) movePage(1);
+                  }}
+                  className="text-[#9c1414] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+                  aria-label={lang === 'ru' ? 'Следующая страница авторов' : 'Next authors page'}
+                >
+                  {(currentPage + 1).toString().padStart(2, '0')}
+                </button>
+                <span className="mx-[0.5vw] text-[#444]">/</span>
+                <button
+                  onClick={() => {
+                    if (!showPopup && totalPages > 1) {
+                      setIsPagePickerOpen(true);
+                    }
+                  }}
+                  className="text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+                  aria-expanded={isPagePickerOpen}
+                  aria-label={lang === 'ru' ? 'Выбрать страницу авторов' : 'Choose authors page'}
+                >
+                  {totalPages.toString().padStart(2, '0')}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Back Button */}
         <button
