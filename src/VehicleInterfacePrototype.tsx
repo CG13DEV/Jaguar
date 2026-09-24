@@ -7,6 +7,7 @@ type VehicleState = 'cruise' | 'push' | 'damage';
 interface VehicleInterfacePrototypeProps {
   onBack: () => void;
   lang: Language;
+  embedded?: boolean;
 }
 
 const STATES: Array<{ id: VehicleState; ru: string; en: string; speed: number; gear: string; rpm: number; fuel: number }> = [
@@ -15,7 +16,7 @@ const STATES: Array<{ id: VehicleState; ru: string; en: string; speed: number; g
   { id: 'damage', ru: 'Повреждения', en: 'Damage', speed: 71, gear: '3', rpm: 62, fuel: 29 },
 ];
 
-export function VehicleInterfacePrototype({ onBack, lang }: VehicleInterfacePrototypeProps) {
+export function VehicleInterfacePrototype({ onBack, lang, embedded = false }: VehicleInterfacePrototypeProps) {
   const [state, setState] = useState<VehicleState>('cruise');
   const active = useMemo(() => STATES.find((item) => item.id === state) ?? STATES[0], [state]);
 
@@ -26,7 +27,7 @@ export function VehicleInterfacePrototype({ onBack, lang }: VehicleInterfaceProt
       exit={{ opacity: 0 }}
       className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
     >
-      <div className="absolute left-[6vw] top-[5vh]">
+      <div className={embedded ? "hidden" : "absolute left-[6vw] top-[5vh]"}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
@@ -164,7 +165,7 @@ export function VehicleInterfacePrototype({ onBack, lang }: VehicleInterfaceProt
           </div>
         </div>
 
-        <button onClick={onBack} className="group flex shrink-0 items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]">
+        <button onClick={onBack} className={`${embedded ? "hidden" : "group flex"} shrink-0 items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]`}>
           <span className="border border-[#333] px-[0.6vw] py-[0.2vh] font-mono text-[1.2vh] tracking-wider group-hover:border-[#666]">ESC</span>
           <span className="text-[2vh] uppercase tracking-wider">{lang === 'ru' ? 'Назад' : 'Back'}</span>
         </button>
