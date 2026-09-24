@@ -297,7 +297,7 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: 
           </div>
         </div>
 
-        <button onClick={onBack} className="group flex shrink-0 items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]">
+        <button onClick={onBack} className={`${embedded ? "hidden" : "group flex"} shrink-0 items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]`}>
           <span className="border border-[#333] px-[0.6vw] py-[0.2vh] font-mono text-[1.2vh] tracking-wider group-hover:border-[#666]">ESC</span>
           <span className="text-[2vh] uppercase tracking-wider">{lang === 'ru' ? 'Назад' : 'Back'}</span>
         </button>
