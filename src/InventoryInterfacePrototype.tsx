@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, FileText, KeyRound, Package, Plus, Smartphone } from 'lucide-react';
 import { Language } from './App';
@@ -135,7 +135,8 @@ export function InventoryInterfacePrototype({
   const [tab, setTab] = useState<InventoryTab>('items');
   const [selectedItem, setSelectedItem] = useState(0);
   const [selectedInfo, setSelectedInfo] = useState(0);
-  const [contextItem, setContextItem] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ index: number; left: number; top: number } | null>(null);
+  const itemsPaneRef = useRef<HTMLDivElement | null>(null);
 
   const activeItem = ITEMS[selectedItem] ?? ITEMS[0];
   const activeInfo = useMemo(() => INFO[selectedInfo] ?? INFO[0], [selectedInfo]);
@@ -171,7 +172,7 @@ export function InventoryInterfacePrototype({
                 key={item}
                 onClick={() => {
                   setTab(item);
-                  setContextItem(null);
+                  setContextMenu(null);
                 }}
                 className={`group relative flex h-[34px] min-w-[74px] items-center justify-center px-[8px] font-sans text-[9px] uppercase tracking-[0.25em] transition-colors ${
                   tab === item ? 'text-white/72' : 'text-white/24 hover:text-white/48'
@@ -191,8 +192,9 @@ export function InventoryInterfacePrototype({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.2 }}
+                ref={itemsPaneRef}
                 className="absolute inset-0"
-                onMouseDown={() => setContextItem(null)}
+                onMouseDown={() => setContextMenu(null)}
               >
                 <div className="absolute left-[4.5%] top-[28%] w-[18%]">
                   <div className="mb-[10px] font-sans text-[8px] uppercase tracking-[0.26em] text-white/18">
@@ -222,9 +224,26 @@ export function InventoryInterfacePrototype({
                         <button
                           key={item.id}
                           onMouseDown={(event) => event.stopPropagation()}
-                          onClick={() => {
+                          onClick={(event) => {
                             setSelectedItem(index);
-                            setContextItem((current) => current === index ? null : index);
+
+                            const paneRect = itemsPaneRef.current?.getBoundingClientRect();
+                            const cellRect = event.currentTarget.getBoundingClientRect();
+                            if (!paneRect) return;
+
+                            const menuWidth = 126;
+                            const gap = 8;
+                            const fitsRight = cellRect.right + gap + menuWidth <= paneRect.right;
+                            const left = fitsRight
+                              ? cellRect.right - paneRect.left + gap
+                              : cellRect.left - paneRect.left - menuWidth - gap;
+                            const top = cellRect.top - paneRect.top;
+
+                            setContextMenu((current) => (
+                              current?.index === index
+                                ? null
+                                : { index, left: Math.max(8, left), top: Math.max(8, top) }
+                            ));
                           }}
                           className={`relative flex items-center justify-center border bg-white/[0.012] transition-colors ${
                             item.span === 2 ? 'col-span-2' : 'col-span-1'
@@ -268,19 +287,20 @@ export function InventoryInterfacePrototype({
                 </div>
 
                 <AnimatePresence>
-                  {contextItem !== null && (
+                  {contextMenu !== null && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.97, y: -4 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.97, y: -4 }}
                       transition={{ duration: 0.12 }}
                       onMouseDown={(event) => event.stopPropagation()}
-                      className="absolute right-[31%] top-[41%] z-30 min-w-[118px] border border-white/16 bg-[#111]/95 py-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+                      style={{ left: contextMenu.left, top: contextMenu.top }}
+                      className="absolute z-30 min-w-[118px] border border-white/16 bg-[#111]/95 py-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
                     >
                       {(lang === 'ru' ? ['Использовать', 'Осмотреть', 'Объединить', 'Выбросить'] : ['Use', 'Examine', 'Combine', 'Discard']).map((action, index) => (
                         <button
                           key={action}
-                          onClick={() => setContextItem(null)}
+                          onClick={() => setContextMenu(null)}
                           className={`block w-full px-[12px] py-[5px] text-left font-sans text-[9px] transition-colors hover:bg-white/10 hover:text-white/72 ${index === 1 ? 'text-white/58' : 'text-white/34'}`}
                         >
                           {action}
