@@ -85,7 +85,7 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
       onPointerUp={handlePointerUp}
       onPointerCancel={() => { pointerStartRef.current = null; }}
     >
-      <div className="pointer-events-none absolute left-[6vw] top-[5vh] z-40">
+      <div className="pointer-events-none absolute left-[8vw] top-[5vh] z-40">
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
