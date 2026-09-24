@@ -11,16 +11,18 @@ import { AuthorsScreen } from './AuthorsScreen';
 import { GameplayScreen } from './GameplayScreen';
 import { TechnologyScreen } from './TechnologyScreen';
 import { SocialsScreen } from './SocialsScreen';
+import { InterfacesScreen } from './InterfacesScreen';
 
 export type Language = 'ru' | 'en';
-type Screen = 'main' | 'history' | 'gameplay' | 'technology' | 'authors' | 'socials';
+type Screen = 'main' | 'history' | 'gameplay' | 'interfaces' | 'technology' | 'authors' | 'socials';
 
-const SCREENS_BY_MENU_INDEX: Screen[] = ['history', 'gameplay', 'technology', 'authors', 'socials'];
+const SCREENS_BY_MENU_INDEX: Screen[] = ['history', 'gameplay', 'interfaces', 'technology', 'authors', 'socials'];
 
 const isScreen = (value: unknown): value is Screen => (
   value === 'main' ||
   value === 'history' ||
   value === 'gameplay' ||
+  value === 'interfaces' ||
   value === 'technology' ||
   value === 'authors' ||
   value === 'socials'
@@ -35,6 +37,7 @@ export default function App() {
     ru: [
       "История",
       "Геймплей",
+      "Интерфейсы",
       "Технологии",
       "Авторы",
       "Социальные сети"
@@ -42,6 +45,7 @@ export default function App() {
     en: [
       "History",
       "Gameplay",
+      "Interfaces",
       "Technology",
       "Authors",
       "Socials"
@@ -135,6 +139,7 @@ export default function App() {
 
         {currentScreen === 'history' && <HistoryScreen onBack={navigateBack} lang={lang} />}
         {currentScreen === 'gameplay' && <GameplayScreen onBack={navigateBack} lang={lang} />}
+        {currentScreen === 'interfaces' && <InterfacesScreen onBack={navigateBack} lang={lang} />}
         {currentScreen === 'technology' && <TechnologyScreen onBack={navigateBack} lang={lang} />}
         {currentScreen === 'authors' && <AuthorsScreen onBack={navigateBack} lang={lang} />}
         {currentScreen === 'socials' && <SocialsScreen onBack={navigateBack} lang={lang} />}
