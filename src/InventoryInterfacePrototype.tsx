@@ -142,10 +142,10 @@ export function InventoryInterfacePrototype({
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
-    ? 'min(84vw, calc(67vh * 32 / 9))'
+    ? 'min(72vw, calc(67vh * 32 / 9))'
     : viewportRatio === '21:9'
-      ? 'min(84vw, calc(67vh * 21 / 9))'
-      : 'min(84vw, calc(67vh * 16 / 9))';
+      ? 'min(72vw, calc(67vh * 21 / 9))'
+      : 'min(72vw, calc(67vh * 16 / 9))';
 
   return (
     <motion.div
@@ -154,7 +154,7 @@ export function InventoryInterfacePrototype({
       exit={{ opacity: 0 }}
       className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
     >
-      <div className={embedded ? 'hidden' : 'absolute left-[6vw] top-[5vh]'}>
+      <div className={embedded ? 'hidden' : 'absolute left-[8vw] top-[5vh]'}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
