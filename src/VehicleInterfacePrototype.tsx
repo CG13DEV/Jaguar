@@ -21,17 +21,19 @@ function LabSlider({
   suffix: string;
 }) {
   return (
-    <label className="grid grid-cols-[82px_1fr_42px] items-center gap-[10px] font-sans">
-      <span className="text-right text-[1vh] uppercase tracking-[0.18em] text-white/28">{label}</span>
+    <label className="block font-sans">
+      <div className="mb-[0.35vh] flex items-center justify-between">
+        <span className="text-[0.86vh] uppercase tracking-[0.16em] text-white/28">{label}</span>
+        <span className="font-mono text-[0.9vh] text-white/42">{value}{suffix}</span>
+      </div>
       <input
         type="range"
         min={0}
         max={100}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="h-[2px] w-[13vw] min-w-[150px] cursor-pointer accent-[#9c1414]"
+        className="h-[2px] w-full cursor-pointer accent-[#9c1414]"
       />
-      <span className="font-mono text-[1.05vh] text-white/42">{value}{suffix}</span>
     </label>
   );
 }
@@ -194,13 +196,15 @@ export function VehicleInterfacePrototype({
         </div>
       </div>
 
-      <div className="absolute bottom-[15vh] right-[7vw] z-20 flex flex-col items-end gap-[7px]">
-        <div className="mb-[2px] font-sans text-[0.95vh] uppercase tracking-[0.24em] text-white/18">
-          {lang === 'ru' ? 'параметры прототипа' : 'prototype inputs'}
+      <div className="absolute right-[1.15vw] top-[31vh] z-20 w-[5.9vw]">
+        <div className="mb-[1vh] font-sans text-[0.88vh] uppercase tracking-[0.22em] text-white/18">
+          {lang === 'ru' ? 'параметры' : 'parameters'}
         </div>
-        <LabSlider label="RPM" value={rpm} onChange={setRpm} suffix="%" />
-        <LabSlider label={lang === 'ru' ? 'Топливо' : 'Fuel'} value={fuel} onChange={setFuel} suffix="%" />
-        <LabSlider label={lang === 'ru' ? 'Урон' : 'Damage'} value={damage} onChange={setDamage} suffix="%" />
+        <div className="flex flex-col gap-[1.2vh]">
+          <LabSlider label="RPM" value={rpm} onChange={setRpm} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Топливо' : 'Fuel'} value={fuel} onChange={setFuel} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Урон' : 'Damage'} value={damage} onChange={setDamage} suffix="%" />
+        </div>
       </div>
 
       <button
