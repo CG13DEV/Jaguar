@@ -8,6 +8,7 @@ type InfoKind = 'note' | 'notebook' | 'phone';
 interface InventoryInterfacePrototypeProps {
   onBack: () => void;
   lang: Language;
+  embedded?: boolean;
 }
 
 const ITEMS = [
@@ -56,7 +57,7 @@ function ItemGlyph({ id }: { id: string }) {
   return <div className="h-[24px] w-[32px] rotate-[-5deg] border border-white/22" />;
 }
 
-export function InventoryInterfacePrototype({ onBack, lang }: InventoryInterfacePrototypeProps) {
+export function InventoryInterfacePrototype({ onBack, lang, embedded = false }: InventoryInterfacePrototypeProps) {
   const [tab, setTab] = useState<InventoryTab>('items');
   const [selectedItem, setSelectedItem] = useState(0);
   const [selectedInfo, setSelectedInfo] = useState(0);
@@ -70,7 +71,7 @@ export function InventoryInterfacePrototype({ onBack, lang }: InventoryInterface
       exit={{ opacity: 0 }}
       className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
     >
-      <div className="absolute left-[6vw] top-[5vh]">
+      <div className={embedded ? "hidden" : "absolute left-[6vw] top-[5vh]"}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
@@ -256,7 +257,7 @@ export function InventoryInterfacePrototype({ onBack, lang }: InventoryInterface
         </AnimatePresence>
       </div>
 
-      <div className="absolute bottom-[6vh] right-[6vw]">
+      <div className={embedded ? "hidden" : "absolute bottom-[6vh] right-[6vw]"}>
         <button onClick={onBack} className="group flex items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]">
           <span className="border border-[#333] px-[0.6vw] py-[0.2vh] font-mono text-[1.2vh] tracking-wider group-hover:border-[#666]">ESC</span>
           <span className="text-[2vh] uppercase tracking-wider">{lang === 'ru' ? 'Назад' : 'Back'}</span>
