@@ -282,36 +282,37 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false, vi
         </div>
       </div>
 
-      <div className="absolute bottom-[15vh] right-[7vw] z-20 flex items-end justify-end gap-[3vw]">
-        <div className="flex flex-col items-end">
-          <div className="mb-[1vh] flex flex-wrap justify-end gap-[0.45vw]">
-            {MODES.map((item, index) => (
-              <button
-                key={item.id}
-                onClick={() => selectMode(item.id)}
-                className={`flex items-center gap-[0.45vw] border px-[0.72vw] py-[0.45vh] transition-colors ${
-                  item.id === mode
-                    ? 'border-[#9c1414]/70 bg-[#9c1414]/10 text-[#c8c8c8]'
-                    : 'border-white/10 text-[#555] hover:border-white/20 hover:text-[#999]'
-                }`}
-              >
-                <span className={`font-mono text-[0.95vh] ${item.id === mode ? 'text-[#9c1414]' : 'text-[#3e3e3e]'}`}>{index + 1}</span>
-                <span className="text-[1.35vh] uppercase tracking-[0.08em]">{lang === 'ru' ? item.ru : item.en}</span>
-              </button>
-            ))}
-          </div>
-          <div className="text-right font-mono text-[0.95vh] tracking-[0.08em] text-[#383838]">
-            {lang === 'ru'
-              ? '1–5 состояния · SPACE / ЛКМ действие · R перезарядка'
-              : '1–5 states · SPACE / LMB action · R reload'}
-          </div>
+      <div className="absolute right-[1.25vw] top-[27vh] z-20 w-[5.8vw]">
+        <div className="mb-[1vh] font-sans text-[0.9vh] uppercase tracking-[0.22em] text-white/18">
+          {lang === 'ru' ? 'состояние' : 'state'}
         </div>
 
-        <button onClick={onBack} className={`${embedded ? "hidden" : "group flex"} shrink-0 items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]`}>
-          <span className="border border-[#333] px-[0.6vw] py-[0.2vh] font-mono text-[1.2vh] tracking-wider group-hover:border-[#666]">ESC</span>
-          <span className="text-[2vh] uppercase tracking-wider">{lang === 'ru' ? 'Назад' : 'Back'}</span>
-        </button>
+        <div className="flex flex-col gap-[0.55vh]">
+          {MODES.map((item, index) => (
+            <button
+              key={item.id}
+              onClick={() => selectMode(item.id)}
+              className={`flex w-full items-center gap-[0.45vw] border px-[0.55vw] py-[0.7vh] text-left transition-colors ${
+                item.id === mode
+                  ? 'border-[#9c1414]/70 bg-[#9c1414]/10 text-[#c8c8c8]'
+                  : 'border-white/10 text-[#555] hover:border-white/20 hover:text-[#999]'
+              }`}
+            >
+              <span className={`shrink-0 font-mono text-[0.9vh] ${item.id === mode ? 'text-[#9c1414]' : 'text-[#3e3e3e]'}`}>{index + 1}</span>
+              <span className="text-[1.08vh] uppercase leading-[1.05] tracking-[0.06em]">{lang === 'ru' ? item.ru : item.en}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-[1.1vh] font-mono text-[0.78vh] leading-[1.55] tracking-[0.04em] text-[#383838]">
+          {lang === 'ru' ? 'SPACE / ЛКМ — действие\nR — перезарядка' : 'SPACE / LMB — action\nR — reload'}
+        </div>
       </div>
+
+      <button onClick={onBack} className={`${embedded ? "hidden" : "group flex"} absolute bottom-[6vh] right-[6vw] items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]`}>
+        <span className="border border-[#333] px-[0.6vw] py-[0.2vh] font-mono text-[1.2vh] tracking-wider group-hover:border-[#666]">ESC</span>
+        <span className="text-[2vh] uppercase tracking-wider">{lang === 'ru' ? 'Назад' : 'Back'}</span>
+      </button>
     </motion.div>
   );
 }
