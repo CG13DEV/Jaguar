@@ -7,6 +7,7 @@ type Mode = 'unarmed' | 'pistol' | 'shotgun' | 'melee' | 'drugged';
 interface CharacterInterfacePrototypeProps {
   onBack: () => void;
   lang: Language;
+  embedded?: boolean;
 }
 
 const MODES: Array<{
@@ -91,7 +92,7 @@ function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
   );
 }
 
-export function CharacterInterfacePrototype({ onBack, lang }: CharacterInterfacePrototypeProps) {
+export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: CharacterInterfacePrototypeProps) {
   const [mode, setMode] = useState<Mode>('pistol');
   const [ammo, setAmmo] = useState(8);
   const [reserve, setReserve] = useState(24);
@@ -163,7 +164,7 @@ export function CharacterInterfacePrototype({ onBack, lang }: CharacterInterface
       exit={{ opacity: 0 }}
       className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
     >
-      <div className="absolute left-[6vw] top-[5vh]">
+      <div className={embedded ? "hidden" : "absolute left-[6vw] top-[5vh]"}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
