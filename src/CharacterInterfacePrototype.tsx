@@ -162,10 +162,10 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false, vi
   const bullets = Array.from({ length: config.magazine ?? 0 }, (_, index) => index < ammo);
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
-    ? 'min(84vw, calc(67vh * 32 / 9))'
+    ? 'min(72vw, calc(67vh * 32 / 9))'
     : viewportRatio === '21:9'
-      ? 'min(84vw, calc(67vh * 21 / 9))'
-      : 'min(84vw, calc(67vh * 16 / 9))';
+      ? 'min(72vw, calc(67vh * 21 / 9))'
+      : 'min(72vw, calc(67vh * 16 / 9))';
 
   return (
     <motion.div
@@ -174,7 +174,7 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false, vi
       exit={{ opacity: 0 }}
       className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
     >
-      <div className={embedded ? "hidden" : "absolute left-[6vw] top-[5vh]"}>
+      <div className={embedded ? "hidden" : "absolute left-[8vw] top-[5vh]"}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
@@ -282,7 +282,7 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false, vi
         </div>
       </div>
 
-      <div className="absolute right-[1.25vw] top-[27vh] z-20 w-[5.8vw]">
+      <div className="absolute right-[8vw] top-[27vh] z-20 w-[5.4vw]">
         <div className="mb-[1vh] font-sans text-[0.9vh] uppercase tracking-[0.22em] text-white/18">
           {lang === 'ru' ? 'состояние' : 'state'}
         </div>
