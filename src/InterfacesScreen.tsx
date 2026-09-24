@@ -6,6 +6,7 @@ import { VehicleInterfacePrototype } from './VehicleInterfacePrototype';
 import { InventoryInterfacePrototype } from './InventoryInterfacePrototype';
 
 type InterfaceSection = 'character' | 'vehicle' | 'inventory';
+export type ViewportRatio = '16:9' | '21:9' | '32:9';
 
 interface InterfacesScreenProps {
   onBack: () => void;
@@ -18,10 +19,12 @@ const SECTIONS: Array<{ id: InterfaceSection; ru: string; en: string }> = [
   { id: 'inventory', ru: 'Инвентарь', en: 'Inventory' },
 ];
 
+const RATIOS: ViewportRatio[] = ['16:9', '21:9', '32:9'];
 const SWIPE_THRESHOLD_PX = 48;
 
 export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
   const [sectionIndex, setSectionIndex] = useState(0);
+  const [viewportRatio, setViewportRatio] = useState<ViewportRatio>('16:9');
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const activeSection = SECTIONS[sectionIndex];
@@ -36,6 +39,8 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLInputElement) return;
+
       if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') {
         moveSection(-1);
       } else if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') {
@@ -75,7 +80,6 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
       onPointerUp={handlePointerUp}
       onPointerCancel={() => { pointerStartRef.current = null; }}
     >
-      {/* Persistent page header — never remounted when switching prototypes. */}
       <div className="pointer-events-none absolute left-[6vw] top-[5vh] z-40">
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
@@ -88,7 +92,6 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
         </div>
       </div>
 
-      {/* Only the prototype body changes. */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={activeSection.id}
@@ -99,18 +102,17 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
           className="absolute inset-0"
         >
           {activeSection.id === 'character' && (
-            <CharacterInterfacePrototype onBack={onBack} lang={lang} embedded />
+            <CharacterInterfacePrototype onBack={onBack} lang={lang} embedded viewportRatio={viewportRatio} />
           )}
           {activeSection.id === 'vehicle' && (
-            <VehicleInterfacePrototype onBack={onBack} lang={lang} embedded />
+            <VehicleInterfacePrototype onBack={onBack} lang={lang} embedded viewportRatio={viewportRatio} />
           )}
           {activeSection.id === 'inventory' && (
-            <InventoryInterfacePrototype onBack={onBack} lang={lang} embedded />
+            <InventoryInterfacePrototype onBack={onBack} lang={lang} embedded viewportRatio={viewportRatio} />
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Same page language as FeatureScreen: current group name + thin bottom indicators. */}
       <div className="pointer-events-none absolute bottom-[12.6vh] left-1/2 z-40 -translate-x-1/2">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -129,7 +131,6 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
       <div className="absolute bottom-[9.2vh] left-1/2 z-40 flex -translate-x-1/2 gap-[1vw]">
         {SECTIONS.map((item, index) => {
           const active = index === sectionIndex;
-
           return (
             <button
               key={item.id}
@@ -147,7 +148,22 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
         })}
       </div>
 
-      {/* Persistent back control, matching the rest of the site. */}
+      <div className="absolute bottom-[6vh] left-[8vw] z-40 flex items-center font-oswald text-[2vh] tracking-widest">
+        {RATIOS.map((ratio, index) => (
+          <span key={ratio} className="flex items-center">
+            <button
+              onClick={() => setViewportRatio(ratio)}
+              className={`transition-colors duration-300 focus:outline-none ${
+                viewportRatio === ratio ? 'text-[#9c1414]' : 'text-[#555] hover:text-[#c0c0c0]'
+              }`}
+            >
+              {ratio}
+            </button>
+            {index < RATIOS.length - 1 && <span className="mx-[0.65vw] text-[#333]">|</span>}
+          </span>
+        ))}
+      </div>
+
       <div className="absolute bottom-[6vh] right-[8vw] z-40">
         <button
           onClick={onBack}
