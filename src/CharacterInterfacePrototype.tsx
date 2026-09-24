@@ -8,6 +8,7 @@ interface CharacterInterfacePrototypeProps {
   onBack: () => void;
   lang: Language;
   embedded?: boolean;
+  viewportRatio?: '16:9' | '21:9' | '32:9';
 }
 
 const MODES: Array<{
@@ -92,7 +93,7 @@ function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
   );
 }
 
-export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: CharacterInterfacePrototypeProps) {
+export function CharacterInterfacePrototype({ onBack, lang, embedded = false, viewportRatio = '16:9' }: CharacterInterfacePrototypeProps) {
   const [mode, setMode] = useState<Mode>('pistol');
   const [ammo, setAmmo] = useState(8);
   const [reserve, setReserve] = useState(24);
@@ -142,7 +143,10 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: 
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') return onBack();
+      if (event.key === 'Escape') {
+        if (!embedded) onBack();
+        return;
+      }
       if (event.key >= '1' && event.key <= '5') return selectMode(MODES[Number(event.key) - 1].id);
       if (event.key.toLowerCase() === 'r') return reload();
       if (event.code === 'Space') {
@@ -153,9 +157,15 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: 
 
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [action, onBack, reload, selectMode]);
+  }, [action, embedded, onBack, reload, selectMode]);
 
   const bullets = Array.from({ length: config.magazine ?? 0 }, (_, index) => index < ammo);
+  const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
+  const viewportWidth = viewportRatio === '32:9'
+    ? 'min(84vw, calc(67vh * 32 / 9))'
+    : viewportRatio === '21:9'
+      ? 'min(84vw, calc(67vh * 21 / 9))'
+      : 'min(84vw, calc(67vh * 16 / 9))';
 
   return (
     <motion.div
@@ -179,7 +189,7 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: 
       <div className="absolute inset-x-0 top-[17vh] flex justify-center">
         <div
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
-          style={{ width: 'min(84vw, calc(67vh * 16 / 9))', aspectRatio: '16 / 9' }}
+          style={{ width: viewportWidth, aspectRatio: viewportAspect }}
           onMouseDown={(event) => event.button === 0 && action()}
         >
           {mode === 'drugged' && (
@@ -272,25 +282,25 @@ export function CharacterInterfacePrototype({ onBack, lang, embedded = false }: 
         </div>
       </div>
 
-      <div className="absolute bottom-[6vh] left-[6vw] right-[6vw] flex items-end justify-between gap-[3vw]">
-        <div>
-          <div className="mb-[1.4vh] flex flex-wrap gap-[0.55vw]">
+      <div className="absolute bottom-[15vh] right-[7vw] z-20 flex items-end justify-end gap-[3vw]">
+        <div className="flex flex-col items-end">
+          <div className="mb-[1vh] flex flex-wrap justify-end gap-[0.45vw]">
             {MODES.map((item, index) => (
               <button
                 key={item.id}
                 onClick={() => selectMode(item.id)}
-                className={`flex items-center gap-[0.55vw] border px-[0.9vw] py-[0.55vh] transition-colors ${
+                className={`flex items-center gap-[0.45vw] border px-[0.72vw] py-[0.45vh] transition-colors ${
                   item.id === mode
                     ? 'border-[#9c1414]/70 bg-[#9c1414]/10 text-[#c8c8c8]'
                     : 'border-white/10 text-[#555] hover:border-white/20 hover:text-[#999]'
                 }`}
               >
-                <span className={`font-mono text-[1.05vh] ${item.id === mode ? 'text-[#9c1414]' : 'text-[#3e3e3e]'}`}>{index + 1}</span>
-                <span className="text-[1.55vh] uppercase tracking-[0.08em]">{lang === 'ru' ? item.ru : item.en}</span>
+                <span className={`font-mono text-[0.95vh] ${item.id === mode ? 'text-[#9c1414]' : 'text-[#3e3e3e]'}`}>{index + 1}</span>
+                <span className="text-[1.35vh] uppercase tracking-[0.08em]">{lang === 'ru' ? item.ru : item.en}</span>
               </button>
             ))}
           </div>
-          <div className="font-mono text-[1.05vh] tracking-[0.08em] text-[#383838]">
+          <div className="text-right font-mono text-[0.95vh] tracking-[0.08em] text-[#383838]">
             {lang === 'ru'
               ? '1–5 состояния · SPACE / ЛКМ действие · R перезарядка'
               : '1–5 states · SPACE / LMB action · R reload'}
