@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { BookOpen, FileText, KeyRound, Package, Plus, Smartphone } from 'lucide-react';
 import { Language } from './App';
 
 type InventoryTab = 'items' | 'info';
@@ -53,24 +54,76 @@ const INFO = [
 ];
 
 function ItemGlyph({ id }: { id: string }) {
-  if (id === 'pistol') return (
-    <div className="relative h-[34px] w-[92px]">
-      <div className="absolute left-[6px] top-[5px] h-[12px] w-[62px] border-b-2 border-r-2 border-white/35 skew-x-[-12deg]" />
-      <div className="absolute left-[52px] top-[16px] h-[17px] w-[12px] -skew-x-[8deg] border-l-2 border-white/28" />
-    </div>
-  );
-  if (id === 'ammo') return <div className="flex items-end gap-[3px]">{Array.from({ length: 5 }, (_, i) => <span key={i} className="h-[25px] w-[4px] rounded-t-full border border-white/28" />)}</div>;
-  if (id === 'knife') return <div className="h-[2px] w-[54px] rotate-[-18deg] bg-white/35 shadow-[12px_5px_0_-1px_rgba(255,255,255,0.16)]" />;
-  if (id === 'med') return <div className="flex h-[34px] w-[46px] items-center justify-center border border-white/24"><span className="text-[20px] text-[#9c1414]/75">+</span></div>;
-  if (id === 'keys') return <div className="h-[26px] w-[26px] rounded-full border border-white/28 after:absolute after:ml-[21px] after:mt-[10px] after:h-[2px] after:w-[27px] after:bg-white/25" />;
-  if (id === 'shells') return <div className="flex gap-[4px]"><span className="h-[30px] w-[8px] rounded-[2px] border border-white/28 border-b-[#9c1414]/60" /><span className="h-[30px] w-[8px] rounded-[2px] border border-white/28 border-b-[#9c1414]/60" /></div>;
-  return <div className="h-[25px] w-[34px] rotate-[-5deg] border border-white/22" />;
+  const iconClass = "h-[34px] w-[34px] text-white/42";
+
+  if (id === 'pistol') {
+    return (
+      <svg viewBox="0 0 120 64" className="h-[46px] w-[104px] text-white/45" aria-hidden="true">
+        <path d="M10 16h78v15H59l-4 8H41l3-8H10z" fill="currentColor" opacity="0.34" />
+        <path d="M44 31h24l-8 26H42l4-18h-8z" fill="currentColor" opacity="0.26" />
+        <path d="M88 19h20v8H88" fill="none" stroke="currentColor" strokeWidth="3" />
+        <path d="M13 14h73M12 31h76" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      </svg>
+    );
+  }
+
+  if (id === 'ammo') {
+    return (
+      <svg viewBox="0 0 72 54" className="h-[38px] w-[58px] text-white/42" aria-hidden="true">
+        {[10, 28, 46].map((x) => (
+          <g key={x}>
+            <path d={`M${x} 17l6-8 6 8v25H${x}z`} fill="currentColor" opacity="0.2" />
+            <path d={`M${x} 17l6-8 6 8v25H${x}z`} fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d={`M${x} 36h12`} stroke="currentColor" strokeWidth="2" />
+          </g>
+        ))}
+      </svg>
+    );
+  }
+
+  if (id === 'knife') {
+    return (
+      <svg viewBox="0 0 110 42" className="h-[34px] w-[92px] text-white/42" aria-hidden="true">
+        <path d="M9 28L72 8 62 26 29 34z" fill="currentColor" opacity="0.26" />
+        <path d="M9 28L72 8 62 26 29 34z" fill="none" stroke="currentColor" strokeWidth="2.2" />
+        <path d="M62 26h34v10H58z" fill="currentColor" opacity="0.18" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    );
+  }
+
+  if (id === 'med') {
+    return (
+      <div className="flex h-[40px] w-[52px] items-center justify-center rounded-[2px] border border-white/22 bg-white/[0.025]">
+        <Plus className="h-[24px] w-[24px] text-[#9c1414]/80" strokeWidth={1.8} />
+      </div>
+    );
+  }
+
+  if (id === 'keys') {
+    return <KeyRound className="h-[42px] w-[42px] text-white/40" strokeWidth={1.45} />;
+  }
+
+  if (id === 'shells') {
+    return (
+      <svg viewBox="0 0 58 54" className="h-[40px] w-[46px] text-white/42" aria-hidden="true">
+        <path d="M8 9h15v34H8zM34 9h15v34H34z" fill="currentColor" opacity="0.14" stroke="currentColor" strokeWidth="2" />
+        <path d="M8 36h15v9H8zM34 36h15v9H34z" fill="#9c1414" opacity="0.52" />
+        <path d="M11 6h9M37 6h9" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    );
+  }
+
+  if (id === 'stash') {
+    return <Package className={iconClass} strokeWidth={1.35} />;
+  }
+
+  return <Package className={iconClass} strokeWidth={1.35} />;
 }
 
 function CategoryMark({ kind }: { kind: InfoKind }) {
-  if (kind === 'phone') return <div className="h-[24px] w-[14px] rounded-[2px] border border-white/28"><div className="mx-auto mt-[3px] h-[13px] w-[8px] border border-white/12" /></div>;
-  if (kind === 'notebook') return <div className="h-[24px] w-[19px] border border-white/28 border-l-2" />;
-  return <div className="h-[23px] w-[18px] rotate-[3deg] border border-white/24" />;
+  if (kind === 'phone') return <Smartphone className="h-[25px] w-[25px] text-white/32" strokeWidth={1.35} />;
+  if (kind === 'notebook') return <BookOpen className="h-[25px] w-[25px] text-white/32" strokeWidth={1.35} />;
+  return <FileText className="h-[25px] w-[25px] text-white/32" strokeWidth={1.35} />;
 }
 
 export function InventoryInterfacePrototype({
@@ -82,6 +135,7 @@ export function InventoryInterfacePrototype({
   const [tab, setTab] = useState<InventoryTab>('items');
   const [selectedItem, setSelectedItem] = useState(0);
   const [selectedInfo, setSelectedInfo] = useState(0);
+  const [contextItem, setContextItem] = useState<number | null>(null);
 
   const activeItem = ITEMS[selectedItem] ?? ITEMS[0];
   const activeInfo = useMemo(() => INFO[selectedInfo] ?? INFO[0], [selectedInfo]);
@@ -115,7 +169,10 @@ export function InventoryInterfacePrototype({
             {(['items', 'info'] as InventoryTab[]).map((item) => (
               <button
                 key={item}
-                onClick={() => setTab(item)}
+                onClick={() => {
+                  setTab(item);
+                  setContextItem(null);
+                }}
                 className={`group relative flex h-[34px] min-w-[74px] items-center justify-center px-[8px] font-sans text-[9px] uppercase tracking-[0.25em] transition-colors ${
                   tab === item ? 'text-white/72' : 'text-white/24 hover:text-white/48'
                 }`}
@@ -135,6 +192,7 @@ export function InventoryInterfacePrototype({
                 exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.2 }}
                 className="absolute inset-0"
+                onMouseDown={() => setContextItem(null)}
               >
                 <div className="absolute left-[4.5%] top-[28%] w-[18%]">
                   <div className="mb-[10px] font-sans text-[8px] uppercase tracking-[0.26em] text-white/18">
@@ -163,7 +221,11 @@ export function InventoryInterfacePrototype({
                       return (
                         <button
                           key={item.id}
-                          onClick={() => setSelectedItem(index)}
+                          onMouseDown={(event) => event.stopPropagation()}
+                          onClick={() => {
+                            setSelectedItem(index);
+                            setContextItem((current) => current === index ? null : index);
+                          }}
                           className={`relative flex items-center justify-center border bg-white/[0.012] transition-colors ${
                             item.span === 2 ? 'col-span-2' : 'col-span-1'
                           } ${
@@ -205,16 +267,28 @@ export function InventoryInterfacePrototype({
                   </AnimatePresence>
                 </div>
 
-                <div className="absolute right-[31%] top-[41%] z-30 min-w-[118px] border border-white/16 bg-[#111]/95 py-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.5)]">
-                  {(lang === 'ru' ? ['Использовать', 'Осмотреть', 'Объединить', 'Выбросить'] : ['Use', 'Examine', 'Combine', 'Discard']).map((action, index) => (
-                    <div
-                      key={action}
-                      className={`px-[12px] py-[5px] font-sans text-[9px] ${index === 1 ? 'bg-white/12 text-white/74' : 'text-white/34'}`}
+                <AnimatePresence>
+                  {contextItem !== null && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.97, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.97, y: -4 }}
+                      transition={{ duration: 0.12 }}
+                      onMouseDown={(event) => event.stopPropagation()}
+                      className="absolute right-[31%] top-[41%] z-30 min-w-[118px] border border-white/16 bg-[#111]/95 py-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
                     >
-                      {action}
-                    </div>
-                  ))}
-                </div>
+                      {(lang === 'ru' ? ['Использовать', 'Осмотреть', 'Объединить', 'Выбросить'] : ['Use', 'Examine', 'Combine', 'Discard']).map((action, index) => (
+                        <button
+                          key={action}
+                          onClick={() => setContextItem(null)}
+                          className={`block w-full px-[12px] py-[5px] text-left font-sans text-[9px] transition-colors hover:bg-white/10 hover:text-white/72 ${index === 1 ? 'text-white/58' : 'text-white/34'}`}
+                        >
+                          {action}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <div className="absolute bottom-[4.5%] right-[5%] flex gap-[18px] font-sans text-[8px] uppercase tracking-[0.18em] text-white/22">
                   <span><b className="mr-[5px] font-mono text-white/45">E</b>{lang === 'ru' ? 'выбрать' : 'confirm'}</span>
