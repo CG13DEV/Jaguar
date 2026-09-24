@@ -13,28 +13,75 @@ function LabSlider({
   label,
   value,
   onChange,
-  suffix,
+  suffix = '',
+  max = 100,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
-  suffix: string;
+  suffix?: string;
+  max?: number;
 }) {
   return (
     <label className="block font-sans">
-      <div className="mb-[0.35vh] flex items-center justify-between">
-        <span className="text-[0.86vh] uppercase tracking-[0.16em] text-white/28">{label}</span>
-        <span className="font-mono text-[0.9vh] text-white/42">{value}{suffix}</span>
+      <div className="mb-[0.3vh] flex items-center justify-between">
+        <span className="text-[0.82vh] uppercase tracking-[0.16em] text-white/24">{label}</span>
+        <span className="font-mono text-[0.86vh] text-white/36">{value}{suffix}</span>
       </div>
       <input
         type="range"
         min={0}
-        max={100}
+        max={max}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-[2px] w-full cursor-pointer accent-[#9c1414]"
       />
     </label>
+  );
+}
+
+function cardinalFromHeading(heading: number) {
+  const points = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return points[Math.round(heading / 45) % 8];
+}
+
+function Radar({ heading }: { heading: number }) {
+  return (
+    <div className="relative h-[82px] w-[82px]">
+      <div className="absolute inset-0 overflow-hidden rounded-full border border-white/12 bg-black/10">
+        <motion.div
+          animate={{ rotate: -heading }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[104px] w-[104px] -translate-x-1/2 -translate-y-1/2"
+        >
+          <i className="absolute left-[49px] top-[-12px] h-[128px] w-px rotate-[18deg] bg-white/12" />
+          <i className="absolute left-[-8px] top-[50px] h-px w-[122px] -rotate-[12deg] bg-white/10" />
+          <i className="absolute left-[22px] top-[18px] h-[66px] w-px -rotate-[42deg] bg-white/8" />
+          <i className="absolute left-[63px] top-[34px] h-[3px] w-[3px] rounded-full bg-white/22" />
+          <i className="absolute left-[29px] top-[70px] h-[2px] w-[2px] rounded-full bg-[#9c1414]/55" />
+        </motion.div>
+
+        <div className="absolute left-1/2 top-1/2 h-[9px] w-[7px] -translate-x-1/2 -translate-y-1/2">
+          <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[3.5px] border-b-[8px] border-x-transparent border-b-white/60" />
+        </div>
+
+        <i className="absolute left-1/2 top-[7px] h-[3px] w-px -translate-x-1/2 bg-white/18" />
+        <i className="absolute bottom-[7px] left-1/2 h-[3px] w-px -translate-x-1/2 bg-white/10" />
+        <i className="absolute left-[7px] top-1/2 h-px w-[3px] -translate-y-1/2 bg-white/10" />
+        <i className="absolute right-[7px] top-1/2 h-px w-[3px] -translate-y-1/2 bg-white/10" />
+      </div>
+
+      <div className="absolute -top-[19px] left-1/2 flex -translate-x-1/2 items-center gap-[6px]">
+        <motion.div
+          animate={{ rotate: heading }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="relative h-[10px] w-[10px]"
+        >
+          <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[2.5px] border-b-[7px] border-x-transparent border-b-white/44" />
+        </motion.div>
+        <span className="font-mono text-[8px] tracking-[0.1em] text-white/28">{cardinalFromHeading(heading)}</span>
+      </div>
+    </div>
   );
 }
 
@@ -47,6 +94,7 @@ export function VehicleInterfacePrototype({
   const [rpm, setRpm] = useState(42);
   const [fuel, setFuel] = useState(68);
   const [damage, setDamage] = useState(12);
+  const [heading, setHeading] = useState(38);
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
@@ -61,9 +109,9 @@ export function VehicleInterfacePrototype({
     return { gear, speed };
   }, [rpm]);
 
+  const lowFuel = fuel <= 25;
+  const visibleDamage = damage >= 18;
   const criticalDamage = damage >= 70;
-  const visibleDamage = damage >= 25;
-  const lowFuel = fuel <= 20;
   const highRpm = rpm >= 84;
 
   return (
@@ -84,132 +132,75 @@ export function VehicleInterfacePrototype({
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
-          {(visibleDamage || lowFuel || highRpm) && (
-            <div className="absolute bottom-[7%] left-[5.5%] flex flex-col gap-[6px] font-rajdhani">
-              {criticalDamage ? (
-                <div className="flex items-center gap-[8px] text-[10px] uppercase tracking-[0.28em] text-[#9c1414]">
-                  <span className="h-[5px] w-[5px] rounded-full bg-[#9c1414]" />
-                  {lang === 'ru' ? 'критическое повреждение' : 'critical damage'}
-                </div>
-              ) : visibleDamage ? (
-                <div className="flex items-center gap-[8px] text-[10px] uppercase tracking-[0.28em] text-white/38">
-                  <span className="h-[5px] w-[5px] rounded-full border border-white/35" />
-                  {lang === 'ru' ? 'повреждение машины' : 'vehicle damage'} {damage}%
-                </div>
-              ) : null}
-
-              {lowFuel && (
-                <div className="flex items-center gap-[8px] text-[10px] uppercase tracking-[0.28em] text-[#9c1414]/85">
-                  <span className="h-[5px] w-[5px] rounded-full bg-[#9c1414]/85" />
-                  {lang === 'ru' ? 'мало топлива' : 'low fuel'}
-                </div>
-              )}
-
-              {highRpm && (
-                <div className="flex items-center gap-[8px] text-[10px] uppercase tracking-[0.28em] text-white/38">
-                  <span className="h-[5px] w-[5px] rounded-full bg-white/28" />
-                  {lang === 'ru' ? 'высокие обороты' : 'high rpm'}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="absolute bottom-[6.5%] right-[5.5%] flex items-end gap-[18px] font-rajdhani">
-            <div className="mb-[4px] flex h-[66px] flex-col justify-end gap-[4px]">
-              <div className="flex items-center justify-between text-[8px] uppercase tracking-[0.25em] text-white/18">
-                <span>rpm</span>
-                <span className={highRpm ? 'text-[#9c1414]/80' : 'text-white/18'}>{rpm}%</span>
-              </div>
-              <div className="flex items-end gap-[2px]">
-                {Array.from({ length: 14 }, (_, index) => {
-                  const threshold = ((index + 1) / 14) * 100;
-                  const lit = rpm >= threshold;
-                  const hot = index >= 11;
-                  return (
-                    <motion.i
-                      key={index}
-                      animate={{ opacity: lit ? 1 : 0.11, height: 8 + index * 1.35 }}
-                      transition={{ duration: 0.14 }}
-                      className={`w-[3px] ${hot && lit ? 'bg-[#9c1414]' : 'bg-white/65'}`}
-                    />
-                  );
-                })}
-              </div>
-
-              <div className="mt-[3px] grid grid-cols-[36px_78px_30px] items-center gap-[5px]">
-                <span className="text-[8px] uppercase tracking-[0.18em] text-white/16">fuel</span>
-                <div className="h-[2px] bg-white/10">
-                  <motion.div
-                    animate={{ width: `${fuel}%` }}
-                    transition={{ duration: 0.16 }}
-                    className={`h-full ${lowFuel ? 'bg-[#9c1414]/80' : 'bg-white/45'}`}
-                  />
-                </div>
-                <span className={`text-right font-mono text-[8px] ${lowFuel ? 'text-[#9c1414]/75' : 'text-white/18'}`}>
-                  {fuel}%
-                </span>
-              </div>
-
-              <div className="grid grid-cols-[36px_78px_30px] items-center gap-[5px]">
-                <span className="text-[8px] uppercase tracking-[0.18em] text-white/16">car</span>
-                <div className="h-[2px] bg-white/10">
-                  <motion.div
-                    animate={{ width: `${damage}%` }}
-                    transition={{ duration: 0.16 }}
-                    className={`h-full ${criticalDamage ? 'bg-[#9c1414]' : visibleDamage ? 'bg-[#9c1414]/60' : 'bg-white/30'}`}
-                  />
-                </div>
-                <span className={`text-right font-mono text-[8px] ${visibleDamage ? 'text-[#9c1414]/70' : 'text-white/18'}`}>
-                  {damage}%
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-end gap-[12px]">
-              <motion.div
-                key={derived.gear}
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-[52px] font-light leading-[0.8] text-white/78"
-              >
-                {derived.gear}
-              </motion.div>
-              <div className="min-w-[86px] text-right">
-                <motion.div
+          <div className="absolute bottom-[5.7%] right-[4.8%] flex items-end gap-[17px]">
+            <div className="mb-[2px] flex flex-col items-end">
+              <div className="flex items-baseline gap-[7px] font-mono">
+                <span className="text-[8px] text-white/24">{derived.gear}</span>
+                <motion.span
                   animate={{ opacity: 1 }}
-                  className="text-[34px] font-light leading-none text-white/72"
+                  className="text-[22px] font-light leading-none text-white/64"
                 >
-                  {derived.speed.toString().padStart(3, '0')}
-                </motion.div>
-                <div className="mt-[3px] text-[9px] uppercase tracking-[0.34em] text-white/22">km/h</div>
+                  {derived.speed}
+                </motion.span>
+                <span className="text-[7px] uppercase tracking-[0.16em] text-white/16">km/h</span>
               </div>
+
+              <div className="mt-[6px] h-px w-[62px] bg-white/7">
+                <motion.div
+                  animate={{ width: `${rpm}%` }}
+                  transition={{ duration: 0.14 }}
+                  className={`h-full ${highRpm ? 'bg-[#9c1414]/72' : 'bg-white/34'}`}
+                />
+              </div>
+
+              {(lowFuel || visibleDamage) && (
+                <div className="mt-[5px] flex items-center gap-[7px] font-mono text-[7px]">
+                  {lowFuel && (
+                    <span className="flex items-center gap-[3px] text-[#9c1414]/68">
+                      F
+                      <i className="h-px w-[18px] bg-white/8">
+                        <motion.i animate={{ width: `${fuel}%` }} className="block h-full bg-[#9c1414]/66" />
+                      </i>
+                    </span>
+                  )}
+                  {visibleDamage && (
+                    <span className={criticalDamage ? 'text-[#9c1414]/82' : 'text-white/26'}>
+                      {criticalDamage ? '!' : '◇'} {damage}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
+
+            <Radar heading={heading} />
           </div>
 
-          {damage > 0 && (
+          {criticalDamage && (
             <motion.div
-              animate={{ opacity: criticalDamage ? [0.05, 0.15, 0.06, 0.12] : damage > 35 ? 0.055 : 0 }}
-              transition={{ duration: 2.2, repeat: criticalDamage ? Infinity : 0 }}
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_78%,rgba(156,20,20,0.24),transparent_36%)]"
+              animate={{ opacity: [0.015, 0.05, 0.02, 0.045, 0.015] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_82%,rgba(156,20,20,0.28),transparent_34%)]"
             />
           )}
         </div>
       </div>
 
-      <div className="absolute right-[8vw] top-[31vh] z-20 w-[5.4vw]">
-        <div className="mb-[1vh] font-sans text-[0.88vh] uppercase tracking-[0.22em] text-white/18">
+      <div className="absolute right-[8vw] top-[29vh] z-20 w-[5.4vw]">
+        <div className="mb-[0.9vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
           {lang === 'ru' ? 'параметры' : 'parameters'}
         </div>
-        <div className="flex flex-col gap-[1.2vh]">
+
+        <div className="flex flex-col gap-[1.05vh]">
           <LabSlider label="RPM" value={rpm} onChange={setRpm} suffix="%" />
           <LabSlider label={lang === 'ru' ? 'Топливо' : 'Fuel'} value={fuel} onChange={setFuel} suffix="%" />
           <LabSlider label={lang === 'ru' ? 'Урон' : 'Damage'} value={damage} onChange={setDamage} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Курс' : 'Heading'} value={heading} onChange={setHeading} suffix="°" max={359} />
         </div>
       </div>
 
       <button
         onClick={onBack}
-        className={`${embedded ? 'hidden' : 'group flex'} absolute bottom-[6vh] right-[6vw] items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]`}
+        className={`${embedded ? 'hidden' : 'group flex'} absolute bottom-[6vh] right-[8vw] items-center gap-[0.8vw] text-[#666] hover:text-[#c0c0c0]`}
       >
         <span className="border border-[#333] px-[0.6vw] py-[0.2vh] font-mono text-[1.2vh] tracking-wider group-hover:border-[#666]">ESC</span>
         <span className="text-[2vh] uppercase tracking-wider">{lang === 'ru' ? 'Назад' : 'Back'}</span>
