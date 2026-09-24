@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
 
-type Mode = 'unarmed' | 'pistol' | 'shotgun' | 'melee' | 'drugged';
+type Mode = 'unarmed' | 'pistol' | 'shotgun' | 'automatic' | 'melee' | 'drugged';
 
 interface CharacterInterfacePrototypeProps {
   onBack: () => void;
@@ -21,6 +21,7 @@ const MODES: Array<{
   { id: 'unarmed', ru: 'Без оружия', en: 'Unarmed' },
   { id: 'pistol', ru: 'Пистолет', en: 'Pistol', magazine: 8, reserve: 24 },
   { id: 'shotgun', ru: 'Дробовик', en: 'Shotgun', magazine: 5, reserve: 15 },
+  { id: 'automatic', ru: 'Автомат', en: 'Automatic', magazine: 30, reserve: 90 },
   { id: 'melee', ru: 'Ближний бой', en: 'Melee' },
   { id: 'drugged', ru: 'Под веществами', en: 'Drugged' },
 ];
@@ -71,13 +72,50 @@ function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
   }
 
   if (mode === 'shotgun') {
-    const gap = pulse ? 12 : 8;
     return (
-      <div className="absolute left-1/2 top-1/2 h-[30px] w-[30px] -translate-x-1/2 -translate-y-1/2">
-        <motion.i animate={{ x: -gap }} transition={{ duration: 0.12 }} className="absolute left-1/2 top-1/2 h-px w-[4px] -translate-x-1/2 -translate-y-1/2 bg-white/58" />
-        <motion.i animate={{ x: gap }} transition={{ duration: 0.12 }} className="absolute left-1/2 top-1/2 h-px w-[4px] -translate-x-1/2 -translate-y-1/2 bg-white/58" />
-        <motion.i animate={{ y: -gap }} transition={{ duration: 0.12 }} className="absolute left-1/2 top-1/2 h-[4px] w-px -translate-x-1/2 -translate-y-1/2 bg-white/58" />
-        <motion.i animate={{ y: gap }} transition={{ duration: 0.12 }} className="absolute left-1/2 top-1/2 h-[4px] w-px -translate-x-1/2 -translate-y-1/2 bg-white/58" />
+      <div className="absolute left-1/2 top-1/2 h-[36px] w-[40px] -translate-x-1/2 -translate-y-1/2">
+        <motion.i
+          key={`shotgun-left-${pulse}`}
+          initial={{ x: pulse ? -16 : -9 }}
+          animate={{ x: -9 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[12px] w-px -translate-x-1/2 -translate-y-1/2 bg-white/52"
+        />
+        <motion.i
+          key={`shotgun-right-${pulse}`}
+          initial={{ x: pulse ? 16 : 9 }}
+          animate={{ x: 9 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[12px] w-px -translate-x-1/2 -translate-y-1/2 bg-white/52"
+        />
+      </div>
+    );
+  }
+
+  if (mode === 'automatic') {
+    return (
+      <div className="absolute left-1/2 top-1/2 h-[36px] w-[36px] -translate-x-1/2 -translate-y-1/2">
+        <motion.i
+          key={`auto-left-${pulse}`}
+          initial={{ x: pulse ? -14 : -7 }}
+          animate={{ x: -7 }}
+          transition={{ duration: 0.16, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2 bg-white/55"
+        />
+        <motion.i
+          key={`auto-right-${pulse}`}
+          initial={{ x: pulse ? 14 : 7 }}
+          animate={{ x: 7 }}
+          transition={{ duration: 0.16, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2 bg-white/55"
+        />
+        <motion.i
+          key={`auto-bottom-${pulse}`}
+          initial={{ y: pulse ? 14 : 7 }}
+          animate={{ y: 7 }}
+          transition={{ duration: 0.16, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2 bg-white/55"
+        />
       </div>
     );
   }
@@ -254,7 +292,7 @@ export function CharacterInterfacePrototype({
         return;
       }
 
-      if (event.key >= '1' && event.key <= '5') {
+      if (event.key >= '1' && event.key <= '6') {
         selectMode(MODES[Number(event.key) - 1].id);
         return;
       }
