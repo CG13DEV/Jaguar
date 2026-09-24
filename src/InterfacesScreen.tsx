@@ -39,6 +39,11 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onBack();
+        return;
+      }
+
       if (event.target instanceof HTMLInputElement) return;
 
       if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') {
@@ -50,7 +55,7 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [moveSection]);
+  }, [moveSection, onBack]);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'touch') return;
