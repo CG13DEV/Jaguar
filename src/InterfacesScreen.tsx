@@ -146,18 +146,18 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
-      style={{ touchAction: 'none' }}
+      style={{ touchAction: 'pan-y' }}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={() => { pointerStartRef.current = null; }}
     >
-      <div className="pointer-events-none absolute left-[8vw] top-[5vh] z-40">
-        <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
+      <div className="pointer-events-none absolute left-[8vw] top-[5vh] z-40 max-md:left-4 max-md:top-4">
+        <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0] max-md:text-[30px]">
           {lang === 'ru' ? 'Интерфейсы' : 'Interfaces'}
         </h1>
-        <div className="mt-[1.4vh] flex items-center gap-[0.8vw]">
-          <div className="h-[2px] w-[1.5vw] bg-[#9c1414]" />
-          <span className="font-sans text-[1.5vh] lowercase tracking-[0.18em] text-[#555]">
+        <div className="mt-[1.4vh] flex items-center gap-[0.8vw] max-md:mt-2 max-md:gap-2">
+          <div className="h-[2px] w-[1.5vw] bg-[#9c1414] max-md:w-5" />
+          <span className="font-sans text-[1.5vh] lowercase tracking-[0.18em] text-[#555] max-md:text-[10px]">
             {lang === 'ru' ? 'прототипы игровых экранов' : 'game interface prototypes'}
           </span>
         </div>
@@ -184,7 +184,7 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
         </motion.div>
       </AnimatePresence>
 
-      <div className="pointer-events-none absolute bottom-[12.6vh] left-1/2 z-40 -translate-x-1/2">
+      <div className="pointer-events-none absolute bottom-[12.6vh] left-1/2 z-40 -translate-x-1/2 max-md:bottom-auto max-md:top-[72px]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeSection.id}
@@ -192,35 +192,35 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="font-sans text-[1.05vh] uppercase tracking-[0.28em] text-[#555]"
+            className="font-sans text-[1.05vh] uppercase tracking-[0.28em] text-[#555] max-md:text-[9px]"
           >
             {lang === 'ru' ? activeSection.ru : activeSection.en}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="absolute bottom-[9.2vh] left-1/2 z-40 flex -translate-x-1/2 gap-[1vw]">
+      <div className="absolute bottom-[9.2vh] left-1/2 z-40 flex -translate-x-1/2 gap-[1vw] max-md:bottom-auto max-md:top-[88px] max-md:gap-1">
         {SECTIONS.map((item, index) => {
           const active = index === sectionIndex;
           return (
             <button
               key={item.id}
               onClick={() => goToSection(index)}
-              className="flex items-center justify-center px-[1vw] py-[1vh] focus:outline-none"
+              className="flex items-center justify-center px-[1vw] py-[1vh] focus:outline-none max-md:px-2 max-md:py-2"
               aria-label={lang === 'ru' ? item.ru : item.en}
             >
               {active ? (
-                <div className="h-[3px] w-[4vw] bg-[#9c1414] shadow-[0_0_10px_rgba(156,20,20,0.8)] transition-all duration-300" />
+                <div className="h-[3px] w-[4vw] bg-[#9c1414] shadow-[0_0_10px_rgba(156,20,20,0.8)] transition-all duration-300 max-md:w-10" />
               ) : (
-                <div className="h-[2px] w-[3vw] bg-[#444] transition-all duration-300 hover:bg-[#666]" />
+                <div className="h-[2px] w-[3vw] bg-[#444] transition-all duration-300 hover:bg-[#666] max-md:w-7" />
               )}
             </button>
           );
         })}
       </div>
 
-      <div className="absolute bottom-[6vh] left-[8vw] z-40 flex items-center gap-[1.2vw]">
-        <div className="flex items-center font-oswald text-[2vh] tracking-widest">
+      <div className="absolute bottom-[6vh] left-[8vw] z-40 flex items-center gap-[1.2vw] max-md:bottom-3 max-md:left-3 max-md:gap-3">
+        <div className="flex items-center font-oswald text-[2vh] tracking-widest max-md:text-[12px]">
           {RATIOS.map((ratio, index) => (
             <span key={ratio} className="flex items-center">
               <button
@@ -231,30 +231,30 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
               >
                 {ratio}
               </button>
-              {index < RATIOS.length - 1 && <span className="mx-[0.65vw] text-[#333]">|</span>}
+              {index < RATIOS.length - 1 && <span className="mx-[0.65vw] text-[#333] max-md:mx-[6px]">|</span>}
             </span>
           ))}
         </div>
 
         <button
           onClick={toggleFullscreen}
-          className={`flex items-center gap-[0.45vw] font-oswald text-[1.4vh] uppercase tracking-[0.14em] transition-colors ${isFullscreen ? 'text-[#9c1414]' : 'text-[#555] hover:text-[#c0c0c0]'}`}
+          className={`flex items-center gap-[0.45vw] font-oswald text-[1.4vh] uppercase tracking-[0.14em] transition-colors max-md:gap-1 max-md:text-[11px] ${isFullscreen ? 'text-[#9c1414]' : 'text-[#555] hover:text-[#c0c0c0]'}`}
           title={lang === 'ru' ? 'Полноэкранный режим' : 'Fullscreen preview'}
         >
-          <Maximize2 className="h-[1.6vh] w-[1.6vh]" strokeWidth={1.4} />
-          {lang === 'ru' ? 'Экран' : 'Full'}
+          <Maximize2 className="h-[1.6vh] w-[1.6vh] max-md:h-4 max-md:w-4" strokeWidth={1.4} />
+          <span className="max-md:hidden">{lang === 'ru' ? 'Экран' : 'Full'}</span>
         </button>
       </div>
 
-      <div className="absolute bottom-[6vh] right-[8vw] z-40">
+      <div className="absolute bottom-[6vh] right-[8vw] z-40 max-md:bottom-3 max-md:right-3">
         <button
           onClick={onBack}
-          className="group flex items-center gap-[1vw] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none"
+          className="group flex items-center gap-[1vw] text-[#666] transition-colors duration-300 hover:text-[#c0c0c0] focus:outline-none max-md:gap-2"
         >
-          <div className="border border-[#333] bg-[#0d0d0d]/50 px-[0.6vw] py-[0.2vh] font-mono text-[1.4vh] tracking-wider transition-colors duration-300 group-hover:border-[#666]">
+          <div className="border border-[#333] bg-[#0d0d0d]/50 px-[0.6vw] py-[0.2vh] font-mono text-[1.4vh] tracking-wider transition-colors duration-300 group-hover:border-[#666] max-md:hidden">
             ESC
           </div>
-          <span className="text-[2.5vh] uppercase tracking-wider">
+          <span className="text-[2.5vh] uppercase tracking-wider max-md:text-[14px]">
             {lang === 'ru' ? 'Назад' : 'Back'}
           </span>
         </button>
