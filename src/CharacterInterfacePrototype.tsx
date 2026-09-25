@@ -90,11 +90,10 @@ function Reticle({
     const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 6));
 
     return (
-      <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2">
-        <motion.span
-          animate={{ x: -currentGap }}
-          transition={{ duration: 0.09, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2"
+      <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
+        <span
+          className="absolute top-1/2 h-[14px] w-px -translate-y-1/2 transition-[left] duration-[90ms] ease-out"
+          style={{ left: `calc(50% - ${currentGap}px)` }}
         >
           <motion.i
             key={`shotgun-left-${pulse}`}
@@ -103,12 +102,11 @@ function Reticle({
             transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
             className="block h-full w-px bg-white"
           />
-        </motion.span>
+        </span>
 
-        <motion.span
-          animate={{ x: currentGap }}
-          transition={{ duration: 0.09, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2"
+        <span
+          className="absolute top-1/2 h-[14px] w-px -translate-y-1/2 transition-[left] duration-[90ms] ease-out"
+          style={{ left: `calc(50% + ${currentGap}px)` }}
         >
           <motion.i
             key={`shotgun-right-${pulse}`}
@@ -117,7 +115,7 @@ function Reticle({
             transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
             className="block h-full w-px bg-white"
           />
-        </motion.span>
+        </span>
       </div>
     );
   }
@@ -130,11 +128,10 @@ function Reticle({
     const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 3));
 
     return (
-      <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2">
-        <motion.span
-          animate={{ x: -currentGap }}
-          transition={{ duration: 0.08, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2"
+      <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
+        <span
+          className="absolute top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2 transition-[left] duration-[80ms] ease-out"
+          style={{ left: `calc(50% - ${currentGap}px)` }}
         >
           <motion.i
             key={`auto-left-${pulse}`}
@@ -143,12 +140,11 @@ function Reticle({
             transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
             className="block h-px w-[5px] bg-white"
           />
-        </motion.span>
+        </span>
 
-        <motion.span
-          animate={{ x: currentGap }}
-          transition={{ duration: 0.08, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2"
+        <span
+          className="absolute top-1/2 h-px w-[5px] -translate-y-1/2 transition-[left] duration-[80ms] ease-out"
+          style={{ left: `calc(50% + ${currentGap}px)` }}
         >
           <motion.i
             key={`auto-right-${pulse}`}
@@ -157,12 +153,11 @@ function Reticle({
             transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
             className="block h-px w-[5px] bg-white"
           />
-        </motion.span>
+        </span>
 
-        <motion.span
-          animate={{ y: currentGap }}
-          transition={{ duration: 0.08, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2"
+        <span
+          className="absolute left-1/2 h-[5px] w-px -translate-x-1/2 transition-[top] duration-[80ms] ease-out"
+          style={{ top: `calc(50% + ${currentGap}px)` }}
         >
           <motion.i
             key={`auto-bottom-${pulse}`}
@@ -171,7 +166,7 @@ function Reticle({
             transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
             className="block h-[5px] w-px bg-white"
           />
-        </motion.span>
+        </span>
       </div>
     );
   }
