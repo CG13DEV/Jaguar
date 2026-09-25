@@ -132,20 +132,33 @@ export function VehicleInterfacePrototype({
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
-          <div className="absolute bottom-[5.7%] right-[4.8%] flex items-end gap-[17px]">
-            <div className="mb-[2px] flex flex-col items-end">
-              <div className="flex items-baseline gap-[7px] font-mono">
-                <span className="text-[8px] text-white/24">{derived.gear}</span>
+          <div className="absolute bottom-[5.7%] left-[4.8%]">
+            <Radar heading={heading} />
+          </div>
+
+          <div className="absolute bottom-[5.7%] right-[4.8%] flex items-end gap-[14px]">
+            <motion.div
+              key={derived.gear}
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.12 }}
+              className="font-mono text-[30px] font-light leading-[0.8] text-white/72"
+            >
+              {derived.gear}
+            </motion.div>
+
+            <div className="mb-[1px] flex flex-col items-end">
+              <div className="flex items-baseline gap-[5px] font-mono">
                 <motion.span
                   animate={{ opacity: 1 }}
-                  className="text-[22px] font-light leading-none text-white/64"
+                  className="text-[20px] font-light leading-none text-white/58"
                 >
                   {derived.speed}
                 </motion.span>
                 <span className="text-[7px] uppercase tracking-[0.16em] text-white/16">km/h</span>
               </div>
 
-              <div className="mt-[6px] h-px w-[62px] bg-white/7">
+              <div className="mt-[6px] h-px w-[58px] bg-white/7">
                 <motion.div
                   animate={{ width: `${rpm}%` }}
                   transition={{ duration: 0.14 }}
@@ -171,8 +184,6 @@ export function VehicleInterfacePrototype({
                 </div>
               )}
             </div>
-
-            <Radar heading={heading} />
           </div>
 
           {criticalDamage && (
