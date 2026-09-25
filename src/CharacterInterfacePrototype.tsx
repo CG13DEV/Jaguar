@@ -60,10 +60,12 @@ function Reticle({
   mode,
   pulse,
   recoil,
+  kick,
 }: {
   mode: Mode;
   pulse: number;
   recoil: number;
+  kick: boolean;
 }) {
   if (mode === 'unarmed') return null;
 
@@ -87,35 +89,24 @@ function Reticle({
     const sustainedMaxGap = 62;
     const absoluteMaxGap = 68;
     const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
-    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 6));
+    const visualGap = Math.min(absoluteMaxGap, currentGap + (kick ? 6 : 0));
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
-        <span
-          className="absolute top-1/2 h-[14px] w-px -translate-y-1/2 transition-[left] duration-[90ms] ease-out"
-          style={{ left: `calc(50% - ${currentGap}px)` }}
-        >
-          <motion.i
-            key={`shotgun-left-${pulse}`}
-            initial={{ x: 0, opacity: 0.52 }}
-            animate={{ x: [0, -shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
-            transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
-            className="block h-full w-px bg-white"
-          />
-        </span>
-
-        <span
-          className="absolute top-1/2 h-[14px] w-px -translate-y-1/2 transition-[left] duration-[90ms] ease-out"
-          style={{ left: `calc(50% + ${currentGap}px)` }}
-        >
-          <motion.i
-            key={`shotgun-right-${pulse}`}
-            initial={{ x: 0, opacity: 0.52 }}
-            animate={{ x: [0, shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
-            transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
-            className="block h-full w-px bg-white"
-          />
-        </span>
+        <i
+          className="absolute top-1/2 block h-[14px] w-px -translate-y-1/2 bg-white transition-[left,opacity] duration-[70ms] ease-out"
+          style={{
+            left: `calc(50% - ${visualGap}px)`,
+            opacity: kick ? 0.82 : 0.52,
+          }}
+        />
+        <i
+          className="absolute top-1/2 block h-[14px] w-px -translate-y-1/2 bg-white transition-[left,opacity] duration-[70ms] ease-out"
+          style={{
+            left: `calc(50% + ${visualGap}px)`,
+            opacity: kick ? 0.82 : 0.52,
+          }}
+        />
       </div>
     );
   }
@@ -125,48 +116,31 @@ function Reticle({
     const sustainedMaxGap = 15;
     const absoluteMaxGap = 18;
     const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
-    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 3));
+    const visualGap = Math.min(absoluteMaxGap, currentGap + (kick ? 3 : 0));
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
-        <span
-          className="absolute top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2 transition-[left] duration-[80ms] ease-out"
-          style={{ left: `calc(50% - ${currentGap}px)` }}
-        >
-          <motion.i
-            key={`auto-left-${pulse}`}
-            initial={{ x: 0, opacity: 0.55 }}
-            animate={{ x: [0, -shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
-            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
-            className="block h-px w-[5px] bg-white"
-          />
-        </span>
-
-        <span
-          className="absolute top-1/2 h-px w-[5px] -translate-y-1/2 transition-[left] duration-[80ms] ease-out"
-          style={{ left: `calc(50% + ${currentGap}px)` }}
-        >
-          <motion.i
-            key={`auto-right-${pulse}`}
-            initial={{ x: 0, opacity: 0.55 }}
-            animate={{ x: [0, shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
-            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
-            className="block h-px w-[5px] bg-white"
-          />
-        </span>
-
-        <span
-          className="absolute left-1/2 h-[5px] w-px -translate-x-1/2 transition-[top] duration-[80ms] ease-out"
-          style={{ top: `calc(50% + ${currentGap}px)` }}
-        >
-          <motion.i
-            key={`auto-bottom-${pulse}`}
-            initial={{ y: 0, opacity: 0.55 }}
-            animate={{ y: [0, shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
-            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
-            className="block h-[5px] w-px bg-white"
-          />
-        </span>
+        <i
+          className="absolute top-1/2 block h-px w-[5px] -translate-x-full -translate-y-1/2 bg-white transition-[left,opacity] duration-[55ms] ease-out"
+          style={{
+            left: `calc(50% - ${visualGap}px)`,
+            opacity: kick ? 0.82 : 0.55,
+          }}
+        />
+        <i
+          className="absolute top-1/2 block h-px w-[5px] -translate-y-1/2 bg-white transition-[left,opacity] duration-[55ms] ease-out"
+          style={{
+            left: `calc(50% + ${visualGap}px)`,
+            opacity: kick ? 0.82 : 0.55,
+          }}
+        />
+        <i
+          className="absolute left-1/2 block h-[5px] w-px -translate-x-1/2 bg-white transition-[top,opacity] duration-[55ms] ease-out"
+          style={{
+            top: `calc(50% + ${visualGap}px)`,
+            opacity: kick ? 0.82 : 0.55,
+          }}
+        />
       </div>
     );
   }
@@ -281,8 +255,11 @@ export function CharacterInterfacePrototype({
   const [stamina, setStamina] = useState(() => getHashNumber('st', 100, 0, 100));
   const [pulse, setPulse] = useState(0);
   const [recoil, setRecoil] = useState(0);
+  const [reticleKick, setReticleKick] = useState(false);
   const [reloading, setReloading] = useState(false);
   const lastShotAtRef = useRef(0);
+  const kickTimerRef = useRef<number | null>(null);
+  const kickFrameRef = useRef<number | null>(null);
 
   const config = useMemo(() => MODES.find((item) => item.id === mode) ?? MODES[0], [mode]);
 
@@ -304,6 +281,11 @@ export function CharacterInterfacePrototype({
     setReloading(false);
     setPulse(0);
     setRecoil(0);
+    setReticleKick(false);
+    if (kickTimerRef.current !== null) window.clearTimeout(kickTimerRef.current);
+    if (kickFrameRef.current !== null) window.cancelAnimationFrame(kickFrameRef.current);
+    kickTimerRef.current = null;
+    kickFrameRef.current = null;
     lastShotAtRef.current = 0;
   }, []);
 
@@ -322,6 +304,20 @@ export function CharacterInterfacePrototype({
         lastShotAtRef.current = performance.now();
         const recoilStep = mode === 'automatic' ? 0.2 : 0.42;
         setRecoil((value) => Math.min(1, value + recoilStep));
+
+        // Retrigger the local shot kick explicitly, even if the previous kick is still active.
+        if (kickTimerRef.current !== null) window.clearTimeout(kickTimerRef.current);
+        if (kickFrameRef.current !== null) window.cancelAnimationFrame(kickFrameRef.current);
+
+        setReticleKick(false);
+        kickFrameRef.current = window.requestAnimationFrame(() => {
+          setReticleKick(true);
+          kickTimerRef.current = window.setTimeout(() => {
+            setReticleKick(false);
+            kickTimerRef.current = null;
+          }, mode === 'automatic' ? 72 : 95);
+          kickFrameRef.current = null;
+        });
       }
     }
 
@@ -348,6 +344,13 @@ export function CharacterInterfacePrototype({
 
     return () => window.clearInterval(timer);
   }, [mode]);
+
+  useEffect(() => {
+    return () => {
+      if (kickTimerRef.current !== null) window.clearTimeout(kickTimerRef.current);
+      if (kickFrameRef.current !== null) window.cancelAnimationFrame(kickFrameRef.current);
+    };
+  }, []);
 
   const reload = useCallback(() => {
     if (!config.magazine || reloading || ammo >= config.magazine || reserve <= 0) return;
@@ -421,7 +424,7 @@ export function CharacterInterfacePrototype({
             if (event.button === 0) action();
           }}
         >
-          <Reticle mode={mode} pulse={pulse} recoil={recoil} />
+          <Reticle mode={mode} pulse={pulse} recoil={recoil} kick={reticleKick} />
           <ResourceLines health={health} stamina={stamina} />
 
           {config.magazine && (
