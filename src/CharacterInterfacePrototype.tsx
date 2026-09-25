@@ -72,49 +72,55 @@ function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
   }
 
   if (mode === 'shotgun') {
+    const baseGap = 15;
+    const kickGap = 28;
+
     return (
-      <div className="absolute left-1/2 top-1/2 h-[36px] w-[40px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2">
         <motion.i
           key={`shotgun-left-${pulse}`}
-          initial={{ x: pulse ? -16 : -9 }}
-          animate={{ x: -9 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[12px] w-px -translate-x-1/2 -translate-y-1/2 bg-white/52"
+          initial={{ x: -baseGap, opacity: 0.52 }}
+          animate={{ x: [-baseGap, -kickGap, -baseGap], opacity: [0.52, 0.82, 0.52] }}
+          transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2 bg-white"
         />
         <motion.i
           key={`shotgun-right-${pulse}`}
-          initial={{ x: pulse ? 16 : 9 }}
-          animate={{ x: 9 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[12px] w-px -translate-x-1/2 -translate-y-1/2 bg-white/52"
+          initial={{ x: baseGap, opacity: 0.52 }}
+          animate={{ x: [baseGap, kickGap, baseGap], opacity: [0.52, 0.82, 0.52] }}
+          transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2 bg-white"
         />
       </div>
     );
   }
 
   if (mode === 'automatic') {
+    const baseGap = 8;
+    const kickGap = 18;
+
     return (
-      <div className="absolute left-1/2 top-1/2 h-[36px] w-[36px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2">
         <motion.i
           key={`auto-left-${pulse}`}
-          initial={{ x: pulse ? -14 : -7 }}
-          animate={{ x: -7 }}
-          transition={{ duration: 0.16, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2 bg-white/55"
+          initial={{ x: -baseGap, opacity: 0.55 }}
+          animate={{ x: [-baseGap, -kickGap, -baseGap], opacity: [0.55, 0.82, 0.55] }}
+          transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2 bg-white"
         />
         <motion.i
           key={`auto-right-${pulse}`}
-          initial={{ x: pulse ? 14 : 7 }}
-          animate={{ x: 7 }}
-          transition={{ duration: 0.16, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2 bg-white/55"
+          initial={{ x: baseGap, opacity: 0.55 }}
+          animate={{ x: [baseGap, kickGap, baseGap], opacity: [0.55, 0.82, 0.55] }}
+          transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2 bg-white"
         />
         <motion.i
           key={`auto-bottom-${pulse}`}
-          initial={{ y: pulse ? 14 : 7 }}
-          animate={{ y: 7 }}
-          transition={{ duration: 0.16, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2 bg-white/55"
+          initial={{ y: baseGap, opacity: 0.55 }}
+          animate={{ y: [baseGap, kickGap, baseGap], opacity: [0.55, 0.82, 0.55] }}
+          transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2 bg-white"
         />
       </div>
     );
