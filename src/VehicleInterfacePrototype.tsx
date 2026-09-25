@@ -345,8 +345,8 @@ export function VehicleInterfacePrototype({
               </div>
             </div>
           </div>
-        </div>
           </ScaledHudCanvas>
+        </div>
       </div>
 
       <div className="vehicle-controls-scroll absolute bottom-[17vh] right-[3.5vw] top-[21vh] z-20 w-[8vw] min-w-[132px] overflow-y-auto pr-[18px] max-md:relative max-md:inset-auto max-md:mx-3 max-md:mt-5 max-md:w-auto max-md:min-w-0 max-md:overflow-visible max-md:pr-0 max-md:pb-[96px]">
