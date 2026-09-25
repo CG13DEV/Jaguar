@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Language } from './App';
 
@@ -9,17 +9,21 @@ interface VehicleInterfacePrototypeProps {
   viewportRatio?: '16:9' | '21:9' | '32:9';
 }
 
+const GEARS = ['R', 'N', '1', '2', '3', '4', '5', '6'];
+
 function LabSlider({
   label,
   value,
   onChange,
   suffix = '',
+  min = 0,
   max = 100,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   suffix?: string;
+  min?: number;
   max?: number;
 }) {
   return (
@@ -30,13 +34,56 @@ function LabSlider({
       </div>
       <input
         type="range"
-        min={0}
+        min={min}
         max={max}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-[2px] w-full cursor-pointer accent-[#9c1414]"
       />
     </label>
+  );
+}
+
+function Meter({
+  label,
+  value,
+  tone = 'neutral',
+}: {
+  label: string;
+  value: number;
+  tone?: 'neutral' | 'danger';
+}) {
+  return (
+    <div className="grid grid-cols-[30px_44px] items-center gap-[5px] font-mono text-[7px]">
+      <span className="text-white/18">{label}</span>
+      <div className="h-px bg-white/7">
+        <motion.div
+          animate={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+          transition={{ duration: 0.12 }}
+          className={`h-full ${tone === 'danger' ? 'bg-[#9c1414]/65' : 'bg-white/34'}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SteeringMeter({ value }: { value: number }) {
+  const normalized = Math.max(-100, Math.min(100, value));
+  const offset = (normalized / 100) * 22;
+
+  return (
+    <div className="grid grid-cols-[30px_44px] items-center gap-[5px] font-mono text-[7px]">
+      <span className="text-white/18">STR</span>
+      <div className="relative h-[5px]">
+        <i className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-white/9" />
+        <i className="absolute left-1/2 top-0 h-[5px] w-px -translate-x-1/2 bg-white/16" />
+        <motion.i
+          animate={{ x: offset }}
+          transition={{ duration: 0.1 }}
+          className="absolute left-1/2 top-1/2 h-[3px] w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/56"
+        />
+      </div>
+    </div>
   );
 }
 
@@ -51,7 +98,7 @@ function Radar({ heading }: { heading: number }) {
       <div className="absolute inset-0 overflow-hidden rounded-full border border-white/12 bg-black/10">
         <motion.div
           animate={{ rotate: -heading }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-[104px] w-[104px] -translate-x-1/2 -translate-y-1/2"
         >
           <i className="absolute left-[49px] top-[-12px] h-[128px] w-px rotate-[18deg] bg-white/12" />
@@ -74,7 +121,7 @@ function Radar({ heading }: { heading: number }) {
       <div className="absolute -top-[19px] left-1/2 flex -translate-x-1/2 items-center gap-[6px]">
         <motion.div
           animate={{ rotate: heading }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
           className="relative h-[10px] w-[10px]"
         >
           <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[2.5px] border-b-[7px] border-x-transparent border-b-white/44" />
@@ -91,10 +138,18 @@ export function VehicleInterfacePrototype({
   embedded = false,
   viewportRatio = '16:9',
 }: VehicleInterfacePrototypeProps) {
+  const [speed, setSpeed] = useState(72);
   const [rpm, setRpm] = useState(42);
   const [fuel, setFuel] = useState(68);
-  const [damage, setDamage] = useState(12);
+  const [throttle, setThrottle] = useState(36);
+  const [brake, setBrake] = useState(0);
+  const [clutch, setClutch] = useState(0);
+  const [steering, setSteering] = useState(12);
+  const [carDamage, setCarDamage] = useState(12);
+  const [driverDamage, setDriverDamage] = useState(4);
+  const [cargoDamage, setCargoDamage] = useState(7);
   const [heading, setHeading] = useState(38);
+  const [gearIndex, setGearIndex] = useState(4);
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
@@ -103,16 +158,8 @@ export function VehicleInterfacePrototype({
       ? 'min(72vw, calc(67vh * 21 / 9))'
       : 'min(72vw, calc(67vh * 16 / 9))';
 
-  const derived = useMemo(() => {
-    const gear = rpm < 8 ? 'N' : rpm < 23 ? '1' : rpm < 39 ? '2' : rpm < 56 ? '3' : rpm < 73 ? '4' : rpm < 88 ? '5' : '6';
-    const speed = rpm < 8 ? 0 : Math.round((rpm / 100) * 172);
-    return { gear, speed };
-  }, [rpm]);
-
-  const lowFuel = fuel <= 25;
-  const visibleDamage = damage >= 18;
-  const criticalDamage = damage >= 70;
-  const highRpm = rpm >= 84;
+  const gear = GEARS[gearIndex] ?? 'N';
+  const rpmDanger = rpm >= 84;
 
   return (
     <motion.div
@@ -129,6 +176,7 @@ export function VehicleInterfacePrototype({
 
       <div className="absolute inset-x-0 top-[17vh] flex justify-center">
         <div
+          id="hud-preview-viewport"
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
@@ -136,75 +184,91 @@ export function VehicleInterfacePrototype({
             <Radar heading={heading} />
           </div>
 
-          <div className="absolute bottom-[5.7%] right-[4.8%] flex items-end gap-[14px]">
-            <motion.div
-              key={derived.gear}
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.12 }}
-              className="font-mono text-[30px] font-light leading-[0.8] text-white/72"
-            >
-              {derived.gear}
-            </motion.div>
+          <div className="absolute bottom-[5.7%] right-[4.8%] flex items-end gap-[15px]">
+            <div className="mb-[1px] grid grid-cols-2 gap-x-[10px] gap-y-[4px]">
+              <Meter label="GAS" value={throttle} />
+              <Meter label="CAR" value={carDamage} tone="danger" />
+              <Meter label="BRK" value={brake} />
+              <Meter label="DRV" value={driverDamage} tone="danger" />
+              <Meter label="CLT" value={clutch} />
+              <Meter label="LOAD" value={cargoDamage} tone="danger" />
+              <SteeringMeter value={steering} />
+              <Meter label="FUEL" value={fuel} />
+            </div>
 
             <div className="mb-[1px] flex flex-col items-end">
               <div className="flex items-baseline gap-[5px] font-mono">
-                <motion.span
-                  animate={{ opacity: 1 }}
-                  className="text-[20px] font-light leading-none text-white/58"
-                >
-                  {derived.speed}
-                </motion.span>
+                <span className="text-[20px] font-light leading-none text-white/58">{speed}</span>
                 <span className="text-[7px] uppercase tracking-[0.16em] text-white/16">km/h</span>
               </div>
 
-              <div className="mt-[6px] h-px w-[58px] bg-white/7">
-                <motion.div
-                  animate={{ width: `${rpm}%` }}
-                  transition={{ duration: 0.14 }}
-                  className={`h-full ${highRpm ? 'bg-[#9c1414]/72' : 'bg-white/34'}`}
-                />
-              </div>
-
-              {(lowFuel || visibleDamage) && (
-                <div className="mt-[5px] flex items-center gap-[7px] font-mono text-[7px]">
-                  {lowFuel && (
-                    <span className="flex items-center gap-[3px] text-[#9c1414]/68">
-                      F
-                      <i className="h-px w-[18px] bg-white/8">
-                        <motion.i animate={{ width: `${fuel}%` }} className="block h-full bg-[#9c1414]/66" />
-                      </i>
-                    </span>
-                  )}
-                  {visibleDamage && (
-                    <span className={criticalDamage ? 'text-[#9c1414]/82' : 'text-white/26'}>
-                      {criticalDamage ? '!' : '◇'} {damage}
-                    </span>
-                  )}
+              <div className="mt-[6px] flex items-center gap-[5px]">
+                <span className="font-mono text-[6px] uppercase tracking-[0.12em] text-white/16">rpm</span>
+                <div className="h-px w-[58px] bg-white/7">
+                  <motion.div
+                    animate={{ width: `${rpm}%` }}
+                    transition={{ duration: 0.12 }}
+                    className={`h-full ${rpmDanger ? 'bg-[#9c1414]/72' : 'bg-white/34'}`}
+                  />
                 </div>
-              )}
+              </div>
             </div>
-          </div>
 
-          {criticalDamage && (
             <motion.div
-              animate={{ opacity: [0.015, 0.05, 0.02, 0.045, 0.015] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_82%,rgba(156,20,20,0.28),transparent_34%)]"
-            />
-          )}
+              key={gear}
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.12 }}
+              className="font-mono text-[34px] font-light leading-[0.78] text-white/74"
+            >
+              {gear}
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      <div className="absolute right-[8vw] top-[29vh] z-20 w-[5.4vw]">
+      <div className="absolute right-[8vw] top-[23vh] z-20 w-[5.4vw]">
         <div className="mb-[0.9vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
           {lang === 'ru' ? 'параметры' : 'parameters'}
         </div>
 
-        <div className="flex flex-col gap-[1.05vh]">
+        <div className="flex flex-col gap-[0.9vh]">
+          <LabSlider label={lang === 'ru' ? 'Скорость' : 'Speed'} value={speed} onChange={setSpeed} max={220} />
           <LabSlider label="RPM" value={rpm} onChange={setRpm} suffix="%" />
+
+          <div>
+            <div className="mb-[0.35vh] flex items-center justify-between font-sans">
+              <span className="text-[0.82vh] uppercase tracking-[0.16em] text-white/24">
+                {lang === 'ru' ? 'Передача' : 'Gear'}
+              </span>
+              <span className="font-mono text-[0.86vh] text-white/36">{gear}</span>
+            </div>
+            <div className="grid grid-cols-4 gap-[2px]">
+              {GEARS.map((item, index) => (
+                <button
+                  key={item}
+                  onClick={() => setGearIndex(index)}
+                  className={`border py-[0.28vh] font-mono text-[0.78vh] transition-colors ${
+                    gearIndex === index
+                      ? 'border-[#9c1414]/55 bg-[#9c1414]/8 text-[#bdbdbd]'
+                      : 'border-white/8 text-[#444] hover:border-white/16 hover:text-[#888]'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <LabSlider label={lang === 'ru' ? 'Газ' : 'Throttle'} value={throttle} onChange={setThrottle} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Тормоз' : 'Brake'} value={brake} onChange={setBrake} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Сцепление' : 'Clutch'} value={clutch} onChange={setClutch} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Руль' : 'Steering'} value={steering} onChange={setSteering} suffix="%" min={-100} max={100} />
+
+          <LabSlider label={lang === 'ru' ? 'Машина' : 'Car dmg'} value={carDamage} onChange={setCarDamage} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Водитель' : 'Driver dmg'} value={driverDamage} onChange={setDriverDamage} suffix="%" />
+          <LabSlider label={lang === 'ru' ? 'Груз' : 'Cargo dmg'} value={cargoDamage} onChange={setCargoDamage} suffix="%" />
           <LabSlider label={lang === 'ru' ? 'Топливо' : 'Fuel'} value={fuel} onChange={setFuel} suffix="%" />
-          <LabSlider label={lang === 'ru' ? 'Урон' : 'Damage'} value={damage} onChange={setDamage} suffix="%" />
           <LabSlider label={lang === 'ru' ? 'Курс' : 'Heading'} value={heading} onChange={setHeading} suffix="°" max={359} />
         </div>
       </div>
