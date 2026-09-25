@@ -167,6 +167,8 @@ export function InventoryInterfacePrototype({
       ? 'min(72vw, calc(67vh * 21 / 9))'
       : 'min(72vw, calc(67vh * 16 / 9))';
 
+  const slotSize = viewportRatio === '32:9' ? '5.3cqw' : viewportRatio === '21:9' ? '6cqw' : '6.8cqw';
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -184,7 +186,7 @@ export function InventoryInterfacePrototype({
         <div
           id="hud-preview-viewport"
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
-          style={{ width: viewportWidth, aspectRatio: viewportAspect }}
+          style={{ width: viewportWidth, aspectRatio: viewportAspect, containerType: 'inline-size' }}
         >
           <div className="absolute left-1/2 top-[5%] z-20 flex -translate-x-1/2 items-center gap-[28px]">
             {(['items', 'info'] as InventoryTab[]).map((item) => (
@@ -233,11 +235,14 @@ export function InventoryInterfacePrototype({
                         <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">04 / 20</span>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-[5px]">
+                      <div
+                        className="grid gap-[5px]"
+                        style={{ gridTemplateColumns: `repeat(4, ${slotSize})`, gridAutoRows: slotSize }}
+                      >
                         {['ammo', 'med', 'shells', 'stash'].map((id, index) => (
                           <div
                             key={`trunk-${id}`}
-                            className="relative aspect-square flex items-center justify-center border border-white/13 bg-white/[0.012]"
+                            className="relative h-full w-full flex items-center justify-center border border-white/13 bg-white/[0.012]"
                           >
                             <ItemGlyph id={id} />
                             <span className="absolute bottom-[5px] right-[6px] font-mono text-[8px] text-white/42">
@@ -246,10 +251,10 @@ export function InventoryInterfacePrototype({
                           </div>
                         ))}
 
-                        {Array.from({ length: 16 }, (_, index) => (
+                        {Array.from({ length: 12 }, (_, index) => (
                           <div
                             key={`trunk-empty-${index}`}
-                            className="aspect-square border border-white/8 bg-white/[0.006]"
+                            className="h-full w-full border border-white/8 bg-white/[0.006]"
                           />
                         ))}
                       </div>
@@ -258,21 +263,24 @@ export function InventoryInterfacePrototype({
                 </AnimatePresence>
 
                 {/* Quick access cross stays independent of both storage grids. */}
-                <div className="absolute left-1/2 top-[31%] w-[16%] -translate-x-1/2">
+                <div className="absolute left-1/2 top-[31%] w-max -translate-x-1/2">
                   <div className="mb-[10px] text-center font-sans text-[8px] uppercase tracking-[0.26em] text-white/18">
                     {lang === 'ru' ? 'быстрый доступ' : 'shortcuts'}
                   </div>
-                  <div className="grid grid-cols-3 grid-rows-3 gap-[5px]">
-                    <div className="col-start-2 row-start-1 flex aspect-square items-center justify-center border border-white/16 bg-white/[0.015]"><ItemGlyph id="pistol" /></div>
-                    <div className="col-start-1 row-start-2 flex aspect-square items-center justify-center border border-white/10 bg-white/[0.01]"><span className="font-mono text-[9px] text-white/18">1</span></div>
-                    <div className="col-start-2 row-start-2 flex aspect-square items-center justify-center border border-white/10 bg-white/[0.01]"><span className="font-mono text-[9px] text-white/18">2</span></div>
-                    <div className="col-start-3 row-start-2 flex aspect-square items-center justify-center border border-white/10 bg-white/[0.01]"><ItemGlyph id="knife" /></div>
-                    <div className="col-start-2 row-start-3 flex aspect-square items-center justify-center border border-white/10 bg-white/[0.01]"><span className="font-mono text-[9px] text-white/18">3</span></div>
+                  <div
+                    className="grid gap-[5px]"
+                    style={{ gridTemplateColumns: `repeat(3, ${slotSize})`, gridTemplateRows: `repeat(3, ${slotSize})` }}
+                  >
+                    <div className="col-start-2 row-start-1 flex h-full w-full items-center justify-center border border-white/16 bg-white/[0.015]"><ItemGlyph id="pistol" /></div>
+                    <div className="col-start-1 row-start-2 flex h-full w-full items-center justify-center border border-white/10 bg-white/[0.01]"><span className="font-mono text-[9px] text-white/18">1</span></div>
+                    <div className="col-start-2 row-start-2" />
+                    <div className="col-start-3 row-start-2 flex h-full w-full items-center justify-center border border-white/10 bg-white/[0.01]"><ItemGlyph id="knife" /></div>
+                    <div className="col-start-2 row-start-3 flex h-full w-full items-center justify-center border border-white/10 bg-white/[0.01]"><span className="font-mono text-[9px] text-white/18">3</span></div>
                   </div>
                 </div>
 
                 {/* Personal inventory — exactly 4 × 2 square cells. */}
-                <div className="absolute right-[5%] top-[18%] w-[34%]">
+                <div className="absolute right-[5%] top-[18%] w-max">
                   <div className="mb-[7px] flex items-baseline justify-between">
                     <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-white/22">
                       {lang === 'ru' ? 'инвентарь' : 'inventory'}
@@ -280,7 +288,10 @@ export function InventoryInterfacePrototype({
                     <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">07 / 08</span>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-[5px]">
+                  <div
+                    className="grid gap-[5px]"
+                    style={{ gridTemplateColumns: `repeat(4, ${slotSize})`, gridAutoRows: slotSize }}
+                  >
                     {ITEMS.map((item, index) => {
                       const active = index === selectedItem;
                       return (
@@ -308,7 +319,7 @@ export function InventoryInterfacePrototype({
                                 : { index, left: Math.max(8, left), top: Math.max(8, top) }
                             ));
                           }}
-                          className={`relative aspect-square flex items-center justify-center border bg-white/[0.012] transition-colors ${
+                          className={`relative h-full w-full flex items-center justify-center border bg-white/[0.012] transition-colors ${
                             active ? 'border-white/62 bg-white/[0.035]' : 'border-white/13 hover:border-white/30'
                           }`}
                         >
@@ -321,7 +332,7 @@ export function InventoryInterfacePrototype({
                       );
                     })}
 
-                    <div className="aspect-square border border-white/8 bg-white/[0.006]" />
+                    <div className="h-full w-full border border-white/8 bg-white/[0.006]" />
                   </div>
 
                   <AnimatePresence mode="wait">
@@ -330,9 +341,9 @@ export function InventoryInterfacePrototype({
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
-                      className="mt-[16px]"
+                      className="mt-[34px]"
                     >
-                      <div className="border-t border-white/13 pt-[11px]">
+                      <div>
                         <div className="text-[16px] font-light text-white/72">{lang === 'ru' ? activeItem.ru : activeItem.en}</div>
                         <div className="mt-[2px] font-sans text-[8px] uppercase tracking-[0.22em] text-white/22">
                           {lang === 'ru' ? activeItem.typeRu : activeItem.typeEn}
