@@ -35,3 +35,14 @@ body {
   --font-caveat: "Caveat", cursive;
   --font-penis-typography: "Penis Typography", sans-serif;
 }
+
+
+#hud-preview-viewport:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: #000 !important;
+}
