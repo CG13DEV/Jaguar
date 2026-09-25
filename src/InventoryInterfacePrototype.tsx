@@ -55,11 +55,11 @@ const INFO = [
 ];
 
 function ItemGlyph({ id }: { id: string }) {
-  const iconClass = "h-[34px] w-[34px] text-white/42";
+  const iconClass = "h-[34px] w-[34px] text-white/42 max-md:scale-[0.4]";
 
   if (id === 'pistol') {
     return (
-      <svg viewBox="0 0 120 64" className="h-[46px] w-[104px] text-white/45" aria-hidden="true">
+      <svg viewBox="0 0 120 64" className="h-[46px] w-[104px] text-white/45 max-md:scale-[0.4]" aria-hidden="true">
         <path d="M10 16h78v15H59l-4 8H41l3-8H10z" fill="currentColor" opacity="0.34" />
         <path d="M44 31h24l-8 26H42l4-18h-8z" fill="currentColor" opacity="0.26" />
         <path d="M88 19h20v8H88" fill="none" stroke="currentColor" strokeWidth="3" />
@@ -70,7 +70,7 @@ function ItemGlyph({ id }: { id: string }) {
 
   if (id === 'ammo') {
     return (
-      <svg viewBox="0 0 72 54" className="h-[38px] w-[58px] text-white/42" aria-hidden="true">
+      <svg viewBox="0 0 72 54" className="h-[38px] w-[58px] text-white/42 max-md:scale-[0.4]" aria-hidden="true">
         {[10, 28, 46].map((x) => (
           <g key={x}>
             <path d={`M${x} 17l6-8 6 8v25H${x}z`} fill="currentColor" opacity="0.2" />
@@ -84,7 +84,7 @@ function ItemGlyph({ id }: { id: string }) {
 
   if (id === 'knife') {
     return (
-      <svg viewBox="0 0 110 42" className="h-[34px] w-[92px] text-white/42" aria-hidden="true">
+      <svg viewBox="0 0 110 42" className="h-[34px] w-[92px] text-white/42 max-md:scale-[0.4]" aria-hidden="true">
         <path d="M9 28L72 8 62 26 29 34z" fill="currentColor" opacity="0.26" />
         <path d="M9 28L72 8 62 26 29 34z" fill="none" stroke="currentColor" strokeWidth="2.2" />
         <path d="M62 26h34v10H58z" fill="currentColor" opacity="0.18" stroke="currentColor" strokeWidth="2" />
@@ -94,19 +94,19 @@ function ItemGlyph({ id }: { id: string }) {
 
   if (id === 'med') {
     return (
-      <div className="flex h-[40px] w-[52px] items-center justify-center rounded-[2px] border border-white/22 bg-white/[0.025]">
+      <div className="flex h-[40px] w-[52px] items-center justify-center rounded-[2px] border border-white/22 bg-white/[0.025] max-md:scale-[0.4]">
         <Plus className="h-[24px] w-[24px] text-[#9c1414]/80" strokeWidth={1.8} />
       </div>
     );
   }
 
   if (id === 'keys') {
-    return <KeyRound className="h-[42px] w-[42px] text-white/40" strokeWidth={1.45} />;
+    return <KeyRound className="h-[42px] w-[42px] text-white/40 max-md:scale-[0.4]" strokeWidth={1.45} />;
   }
 
   if (id === 'shells') {
     return (
-      <svg viewBox="0 0 58 54" className="h-[40px] w-[46px] text-white/42" aria-hidden="true">
+      <svg viewBox="0 0 58 54" className="h-[40px] w-[46px] text-white/42 max-md:scale-[0.4]" aria-hidden="true">
         <path d="M8 9h15v34H8zM34 9h15v34H34z" fill="currentColor" opacity="0.14" stroke="currentColor" strokeWidth="2" />
         <path d="M8 36h15v9H8zM34 36h15v9H34z" fill="#9c1414" opacity="0.52" />
         <path d="M11 6h9M37 6h9" stroke="currentColor" strokeWidth="2" />
@@ -169,7 +169,11 @@ export function InventoryInterfacePrototype({
 
   const slotSize = viewportRatio === '32:9' ? '4.24cqw' : viewportRatio === '21:9' ? '4.8cqw' : '5.44cqw';
   const gridGapPx = 5;
-  const gridWidth = `calc(${slotSize} * 4 + ${gridGapPx * 3}px)`;
+  const gridWidth = viewportRatio === '32:9'
+    ? 'calc(16.96cqw + 15px)'
+    : viewportRatio === '21:9'
+      ? 'calc(19.2cqw + 15px)'
+      : 'calc(21.76cqw + 15px)';
   const trunkRows = viewportRatio === '32:9' ? 3 : viewportRatio === '21:9' ? 5 : 6;
   const trunkSlotCount = trunkRows * 4;
 
@@ -178,7 +182,7 @@ export function InventoryInterfacePrototype({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
+      className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none max-md:overflow-y-auto max-md:overscroll-contain"
     >
       <div className={embedded ? 'hidden' : 'absolute left-[8vw] top-[5vh]'}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
@@ -186,10 +190,10 @@ export function InventoryInterfacePrototype({
         </h1>
       </div>
 
-      <div className="absolute inset-x-0 top-[17vh] flex justify-center">
+      <div className="absolute inset-x-0 top-[17vh] flex justify-center max-md:relative max-md:inset-auto max-md:top-auto max-md:mt-[118px] max-md:px-3">
         <div
           id="hud-preview-viewport"
-          className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+          className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)] max-md:!w-full"
           style={{ width: viewportWidth, aspectRatio: viewportAspect, containerType: 'inline-size' }}
         >
           <div className="absolute left-1/2 top-[5%] z-20 flex -translate-x-1/2 items-center gap-[28px]">
@@ -473,12 +477,12 @@ export function InventoryInterfacePrototype({
         </div>
       </div>
 
-      <div className="absolute right-[8vw] top-[27vh] z-20 w-[6vw] min-w-[96px]">
-        <div className="mb-[0.9vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
+      <div className="absolute right-[8vw] top-[27vh] z-20 w-[6vw] min-w-[96px] max-md:relative max-md:right-auto max-md:top-auto max-md:mx-3 max-md:mt-5 max-md:w-auto max-md:min-w-0 max-md:pb-[96px]">
+        <div className="mb-[0.9vh] font-sans text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.2em] text-white/16">
           {lang === 'ru' ? 'параметры' : 'parameters'}
         </div>
         <label className="flex cursor-pointer items-center justify-between gap-[8px] font-sans">
-          <span className="text-[0.82vh] uppercase tracking-[0.14em] text-white/24">
+          <span className="text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.14em] text-white/24">
             {lang === 'ru' ? 'Багажник' : 'Trunk'}
           </span>
           <input
