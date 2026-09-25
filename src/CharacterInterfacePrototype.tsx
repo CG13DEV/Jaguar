@@ -26,7 +26,7 @@ const DEFAULT_RETICLE_TUNING: Record<FirearmMode, ReticleTuning> = {
   // Automatic defaults intentionally preserve the per-shot response from two commits ago:
   // recoil step 0.20 and a 3px local kick. Only the cumulative ceiling is larger.
   pistol: { reaction: 40, recovery: 55, maxSpread: 9 },
-  shotgun: { reaction: 42, recovery: 45, maxSpread: 62 },
+  shotgun: { reaction: 42, recovery: 45, maxSpread: 68 },
   automatic: { reaction: 20, recovery: 35, maxSpread: 28 },
 };
 
@@ -154,11 +154,14 @@ function Reticle({
     const shotgunTuning = tuning ?? DEFAULT_RETICLE_TUNING.shotgun;
     const baseGap = 45;
     const maxGap = Math.max(baseGap + 1, shotgunTuning.maxSpread);
-    const currentGap = baseGap + (maxGap - baseGap) * recoil;
-    const reactionKick = shotgunTuning.reaction * (6 / 42);
-    const remaining = Math.max(0, maxGap - currentGap);
-    const atLimit = remaining < 0.6;
-    const shotKick = Math.min(reactionKick, remaining);
+    const requestedKick = shotgunTuning.reaction * (6 / 42);
+    const reactionKick = Math.min(requestedKick, Math.max(0, maxGap - baseGap));
+    const sustainedMaxGap = Math.max(baseGap, maxGap - reactionKick);
+    const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
+
+    // The accumulated spread stops before the absolute ceiling by exactly one local kick.
+    // Even at full recoil every shot still pulses OUTWARD to maxGap and returns.
+    const shotKick = Math.min(reactionKick, Math.max(0, maxGap - currentGap));
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2">
@@ -170,7 +173,7 @@ function Reticle({
           <motion.i
             key={`shotgun-left-${pulse}`}
             initial={{ x: 0, opacity: 0.52 }}
-            animate={{ x: atLimit ? [0, reactionKick, 0] : [0, -shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
+            animate={{ x: [0, -shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
             transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
             className="block h-full w-px bg-white"
           />
@@ -184,7 +187,7 @@ function Reticle({
           <motion.i
             key={`shotgun-right-${pulse}`}
             initial={{ x: 0, opacity: 0.52 }}
-            animate={{ x: atLimit ? [0, -reactionKick, 0] : [0, shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
+            animate={{ x: [0, shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
             transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
             className="block h-full w-px bg-white"
           />
@@ -197,19 +200,21 @@ function Reticle({
     const autoTuning = tuning ?? DEFAULT_RETICLE_TUNING.automatic;
     const baseGap = 8;
     const maxGap = Math.max(baseGap + 1, autoTuning.maxSpread);
-    const currentGap = baseGap + (maxGap - baseGap) * recoil;
 
-    // reaction=20 reproduces the old 3px per-shot visual kick.
-    const reactionKick = autoTuning.reaction * 0.15;
-    const remaining = Math.max(0, maxGap - currentGap);
-    const atLimit = remaining < 0.5;
-    const outwardKick = Math.min(reactionKick, remaining);
+    // reaction=20 reproduces the old 3px local per-shot kick.
+    const requestedKick = autoTuning.reaction * 0.15;
+    const reactionKick = Math.min(requestedKick, Math.max(0, maxGap - baseGap));
 
-    // At the hard ceiling we cannot go farther outward, so the same shot response
-    // briefly moves inward and returns to the ceiling. The reaction never disappears.
-    const leftPulse = atLimit ? [0, reactionKick, 0] : [0, -outwardKick, 0];
-    const rightPulse = atLimit ? [0, -reactionKick, 0] : [0, outwardKick, 0];
-    const bottomPulse = atLimit ? [0, -reactionKick, 0] : [0, outwardKick, 0];
+    // Reserve one full local kick below the absolute ceiling.
+    // Accumulated recoil can only reach sustainedMaxGap; every shot then still
+    // pushes OUTWARD to maxGap and returns, including at full accumulated recoil.
+    const sustainedMaxGap = Math.max(baseGap, maxGap - reactionKick);
+    const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
+    const outwardKick = Math.min(reactionKick, Math.max(0, maxGap - currentGap));
+
+    const leftPulse = [0, -outwardKick, 0];
+    const rightPulse = [0, outwardKick, 0];
+    const bottomPulse = [0, outwardKick, 0];
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[84px] w-[84px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
