@@ -14,6 +14,26 @@ interface CharacterInterfacePrototypeProps {
 
 const MODE_IDS: Mode[] = ['unarmed', 'pistol', 'shotgun', 'automatic', 'melee', 'drugged'];
 
+type FirearmMode = 'pistol' | 'shotgun' | 'automatic';
+
+interface ReticleTuning {
+  reaction: number;
+  recovery: number;
+  maxSpread: number;
+}
+
+const DEFAULT_RETICLE_TUNING: Record<FirearmMode, ReticleTuning> = {
+  // Automatic defaults intentionally preserve the per-shot response from two commits ago:
+  // recoil step 0.20 and a 3px local kick. Only the cumulative ceiling is larger.
+  pistol: { reaction: 40, recovery: 55, maxSpread: 9 },
+  shotgun: { reaction: 42, recovery: 45, maxSpread: 62 },
+  automatic: { reaction: 20, recovery: 35, maxSpread: 28 },
+};
+
+function isFirearmMode(mode: Mode): mode is FirearmMode {
+  return mode === 'pistol' || mode === 'shotgun' || mode === 'automatic';
+}
+
 const MODES: Array<{
   id: Mode;
   ru: string;
@@ -33,21 +53,30 @@ function LabSlider({
   label,
   value,
   onChange,
+  min = 0,
+  max = 100,
+  step = 1,
+  suffix = '',
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  suffix?: string;
 }) {
   return (
     <label className="block font-sans">
       <div className="mb-[0.3vh] flex items-center justify-between">
         <span className="text-[0.82vh] uppercase tracking-[0.16em] text-white/24">{label}</span>
-        <span className="font-mono text-[0.86vh] text-white/36">{value}</span>
+        <span className="font-mono text-[0.86vh] text-white/36">{value}{suffix}</span>
       </div>
       <input
         type="range"
-        min={0}
-        max={100}
+        min={min}
+        max={max}
+        step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-[2px] w-full cursor-pointer accent-[#9c1414]"
@@ -60,54 +89,76 @@ function Reticle({
   mode,
   pulse,
   recoil,
+  tuning,
 }: {
   mode: Mode;
   pulse: number;
   recoil: number;
+  tuning: ReticleTuning | null;
 }) {
   if (mode === 'unarmed') return null;
 
   if (mode === 'pistol') {
+    const pistolTuning = tuning ?? DEFAULT_RETICLE_TUNING.pistol;
+    const diameter = Math.max(4, pistolTuning.maxSpread * 2);
+    const expandDuration = Math.max(0.09, 0.3 - pistolTuning.reaction * 0.003);
+    const recoverDuration = Math.max(0.14, 0.48 - pistolTuning.recovery * 0.004);
+    const holdDuration = 0.07;
+    const totalDuration = expandDuration + holdDuration + recoverDuration;
+    const peakTime = expandDuration / totalDuration;
+    const holdTime = (expandDuration + holdDuration) / totalDuration;
+
     return (
-      <svg
-        viewBox="0 0 24 24"
-        className="absolute left-1/2 top-1/2 h-[24px] w-[24px] -translate-x-1/2 -translate-y-1/2 overflow-visible"
-        aria-hidden="true"
-      >
+      <div className="absolute left-1/2 top-1/2 h-[40px] w-[40px] -translate-x-1/2 -translate-y-1/2">
         {pulse === 0 ? (
-          <circle cx="12" cy="12" r="1" fill="rgba(255,255,255,0.72)" />
+          <i className="absolute left-1/2 top-1/2 block h-[2px] w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/72" />
         ) : (
-          <motion.circle
+          <motion.div
             key={`pistol-shot-${pulse}`}
-            cx="12"
-            cy="12"
-            initial={{ r: 1, fillOpacity: 1, strokeOpacity: 0 }}
+            initial={{
+              width: 2,
+              height: 2,
+              backgroundColor: 'rgba(255,255,255,0.72)',
+              borderColor: 'rgba(255,255,255,0)',
+            }}
             animate={{
-              r: [1, 9, 1],
-              fillOpacity: [1, 0, 1],
-              strokeOpacity: [0, 0.78, 0],
+              width: [2, diameter, diameter, 2],
+              height: [2, diameter, diameter, 2],
+              backgroundColor: [
+                'rgba(255,255,255,0.72)',
+                'rgba(255,255,255,0)',
+                'rgba(255,255,255,0)',
+                'rgba(255,255,255,0.72)',
+              ],
+              borderColor: [
+                'rgba(255,255,255,0)',
+                'rgba(255,255,255,0.72)',
+                'rgba(255,255,255,0.72)',
+                'rgba(255,255,255,0)',
+              ],
             }}
             transition={{
-              duration: 0.38,
-              times: [0, 0.46, 1],
+              duration: totalDuration,
+              times: [0, peakTime, holdTime, 1],
               ease: 'easeOut',
             }}
-            fill="white"
-            stroke="white"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
+            className="absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full border"
+            style={{ borderWidth: 1, boxSizing: 'border-box' }}
           />
         )}
-      </svg>
+      </div>
     );
   }
 
   if (mode === 'shotgun') {
+    const shotgunTuning = tuning ?? DEFAULT_RETICLE_TUNING.shotgun;
     const baseGap = 45;
-    const sustainedMaxGap = 62;
-    const absoluteMaxGap = 68;
-    const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
-    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 6));
+    const maxGap = Math.max(baseGap + 1, shotgunTuning.maxSpread);
+    const currentGap = baseGap + (maxGap - baseGap) * recoil;
+    const reactionKick = shotgunTuning.reaction * (6 / 42);
+    const remaining = Math.max(0, maxGap - currentGap);
+    const atLimit = remaining < 0.6;
+    const shotKick = Math.min(reactionKick, remaining);
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2">
@@ -119,7 +170,7 @@ function Reticle({
           <motion.i
             key={`shotgun-left-${pulse}`}
             initial={{ x: 0, opacity: 0.52 }}
-            animate={{ x: [0, -shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
+            animate={{ x: atLimit ? [0, reactionKick, 0] : [0, -shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
             transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
             className="block h-full w-px bg-white"
           />
@@ -133,7 +184,7 @@ function Reticle({
           <motion.i
             key={`shotgun-right-${pulse}`}
             initial={{ x: 0, opacity: 0.52 }}
-            animate={{ x: [0, shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
+            animate={{ x: atLimit ? [0, -reactionKick, 0] : [0, shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
             transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
             className="block h-full w-px bg-white"
           />
@@ -143,58 +194,63 @@ function Reticle({
   }
 
   if (mode === 'automatic') {
+    const autoTuning = tuning ?? DEFAULT_RETICLE_TUNING.automatic;
     const baseGap = 8;
-    const maxGap = 30;
+    const maxGap = Math.max(baseGap + 1, autoTuning.maxSpread);
     const currentGap = baseGap + (maxGap - baseGap) * recoil;
-    const remainingOutward = Math.max(0, maxGap - currentGap);
-    const outwardKick = Math.min(6, remainingOutward);
-    const atLimit = remainingOutward < 0.75;
-    const limitReaction = 2.5;
 
-    const leftPulse = atLimit ? [0, limitReaction, 0] : [0, -outwardKick, 0];
-    const rightPulse = atLimit ? [0, -limitReaction, 0] : [0, outwardKick, 0];
-    const bottomPulse = atLimit ? [0, -limitReaction, 0] : [0, outwardKick, 0];
+    // reaction=20 reproduces the old 3px per-shot visual kick.
+    const reactionKick = autoTuning.reaction * 0.15;
+    const remaining = Math.max(0, maxGap - currentGap);
+    const atLimit = remaining < 0.5;
+    const outwardKick = Math.min(reactionKick, remaining);
+
+    // At the hard ceiling we cannot go farther outward, so the same shot response
+    // briefly moves inward and returns to the ceiling. The reaction never disappears.
+    const leftPulse = atLimit ? [0, reactionKick, 0] : [0, -outwardKick, 0];
+    const rightPulse = atLimit ? [0, -reactionKick, 0] : [0, outwardKick, 0];
+    const bottomPulse = atLimit ? [0, -reactionKick, 0] : [0, outwardKick, 0];
 
     return (
-      <div className="absolute left-1/2 top-1/2 h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
+      <div className="absolute left-1/2 top-1/2 h-[84px] w-[84px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
         <motion.span
           animate={{ x: -currentGap }}
-          transition={{ duration: 0.07, ease: 'easeOut' }}
+          transition={{ duration: 0.08, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2"
         >
           <motion.i
             key={`auto-left-${pulse}`}
             initial={{ x: 0, opacity: 0.55 }}
-            animate={{ x: leftPulse, opacity: [0.55, 0.86, 0.55] }}
-            transition={{ duration: 0.19, times: [0, 0.26, 1], ease: 'easeOut' }}
+            animate={{ x: leftPulse, opacity: [0.55, 0.82, 0.55] }}
+            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
             className="block h-px w-[5px] bg-white"
           />
         </motion.span>
 
         <motion.span
           animate={{ x: currentGap }}
-          transition={{ duration: 0.07, ease: 'easeOut' }}
+          transition={{ duration: 0.08, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2"
         >
           <motion.i
             key={`auto-right-${pulse}`}
             initial={{ x: 0, opacity: 0.55 }}
-            animate={{ x: rightPulse, opacity: [0.55, 0.86, 0.55] }}
-            transition={{ duration: 0.19, times: [0, 0.26, 1], ease: 'easeOut' }}
+            animate={{ x: rightPulse, opacity: [0.55, 0.82, 0.55] }}
+            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
             className="block h-px w-[5px] bg-white"
           />
         </motion.span>
 
         <motion.span
           animate={{ y: currentGap }}
-          transition={{ duration: 0.07, ease: 'easeOut' }}
+          transition={{ duration: 0.08, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2"
         >
           <motion.i
             key={`auto-bottom-${pulse}`}
             initial={{ y: 0, opacity: 0.55 }}
-            animate={{ y: bottomPulse, opacity: [0.55, 0.86, 0.55] }}
-            transition={{ duration: 0.19, times: [0, 0.26, 1], ease: 'easeOut' }}
+            animate={{ y: bottomPulse, opacity: [0.55, 0.82, 0.55] }}
+            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
             className="block h-[5px] w-px bg-white"
           />
         </motion.span>
@@ -312,10 +368,45 @@ export function CharacterInterfacePrototype({
   const [stamina, setStamina] = useState(() => getHashNumber('st', 100, 0, 100));
   const [pulse, setPulse] = useState(0);
   const [recoil, setRecoil] = useState(0);
+  const [reticleTuning, setReticleTuning] = useState<Record<FirearmMode, ReticleTuning>>(() => {
+    const next = {
+      pistol: { ...DEFAULT_RETICLE_TUNING.pistol },
+      shotgun: { ...DEFAULT_RETICLE_TUNING.shotgun },
+      automatic: { ...DEFAULT_RETICLE_TUNING.automatic },
+    };
+
+    if (isFirearmMode(initialMode)) {
+      const defaults = next[initialMode];
+      next[initialMode] = {
+        reaction: getHashNumber('reaction', defaults.reaction, 1, 100),
+        recovery: getHashNumber('recovery', defaults.recovery, 1, 100),
+        maxSpread: getHashNumber(
+          'spread',
+          defaults.maxSpread,
+          initialMode === 'shotgun' ? 46 : initialMode === 'automatic' ? 10 : 2,
+          initialMode === 'shotgun' ? 90 : initialMode === 'automatic' ? 45 : 18,
+        ),
+      };
+    }
+
+    return next;
+  });
   const [reloading, setReloading] = useState(false);
   const lastShotAtRef = useRef(0);
 
   const config = useMemo(() => MODES.find((item) => item.id === mode) ?? MODES[0], [mode]);
+  const activeReticleTuning = isFirearmMode(mode) ? reticleTuning[mode] : null;
+
+  const updateReticleTuning = useCallback((key: keyof ReticleTuning, value: number) => {
+    if (!isFirearmMode(mode)) return;
+    setReticleTuning((current) => ({
+      ...current,
+      [mode]: {
+        ...current[mode],
+        [key]: value,
+      },
+    }));
+  }, [mode]);
 
   useEffect(() => {
     replaceHashParams({
@@ -324,8 +415,21 @@ export function CharacterInterfacePrototype({
       st: stamina,
       ammo: config.magazine ? ammo : null,
       reserve: config.magazine ? reserve : null,
+      reaction: activeReticleTuning?.reaction ?? null,
+      recovery: activeReticleTuning?.recovery ?? null,
+      spread: activeReticleTuning?.maxSpread ?? null,
     });
-  }, [ammo, config.magazine, health, mode, reserve, stamina]);
+  }, [
+    activeReticleTuning?.maxSpread,
+    activeReticleTuning?.reaction,
+    activeReticleTuning?.recovery,
+    ammo,
+    config.magazine,
+    health,
+    mode,
+    reserve,
+    stamina,
+  ]);
 
   const selectMode = useCallback((nextMode: Mode) => {
     const next = MODES.find((item) => item.id === nextMode) ?? MODES[0];
@@ -349,9 +453,9 @@ export function CharacterInterfacePrototype({
 
       setAmmo((value) => value - 1);
 
-      if (mode === 'automatic' || mode === 'shotgun') {
+      if ((mode === 'automatic' || mode === 'shotgun') && activeReticleTuning) {
         lastShotAtRef.current = performance.now();
-        const recoilStep = mode === 'automatic' ? 0.38 : 0.42;
+        const recoilStep = activeReticleTuning.reaction / 100;
         setRecoil((value) => Math.min(1, value + recoilStep));
       }
     }
@@ -361,7 +465,7 @@ export function CharacterInterfacePrototype({
     }
 
     setPulse((value) => value + 1);
-  }, [ammo, config.magazine, mode, reloading]);
+  }, [activeReticleTuning, ammo, config.magazine, mode, reloading]);
 
   useEffect(() => {
     if (mode !== 'automatic' && mode !== 'shotgun') {
@@ -369,8 +473,9 @@ export function CharacterInterfacePrototype({
       return;
     }
 
-    const decayDelay = mode === 'automatic' ? 260 : 220;
-    const decayStep = mode === 'automatic' ? 0.022 : 0.045;
+    const tuning = reticleTuning[mode];
+    const decayDelay = mode === 'automatic' ? 150 : 220;
+    const decayStep = tuning.recovery / 1000;
 
     const timer = window.setInterval(() => {
       if (performance.now() - lastShotAtRef.current < decayDelay) return;
@@ -378,7 +483,7 @@ export function CharacterInterfacePrototype({
     }, 50);
 
     return () => window.clearInterval(timer);
-  }, [mode]);
+  }, [mode, reticleTuning]);
 
   const reload = useCallback(() => {
     if (!config.magazine || reloading || ammo >= config.magazine || reserve <= 0) return;
@@ -452,7 +557,7 @@ export function CharacterInterfacePrototype({
             if (event.button === 0) action();
           }}
         >
-          <Reticle mode={mode} pulse={pulse} recoil={recoil} />
+          <Reticle mode={mode} pulse={pulse} recoil={recoil} tuning={activeReticleTuning} />
           <ResourceLines health={health} stamina={stamina} />
 
           {config.magazine && (
@@ -499,6 +604,42 @@ export function CharacterInterfacePrototype({
           <LabSlider label="HP" value={health} onChange={setHealth} />
           <LabSlider label="ST" value={stamina} onChange={setStamina} />
         </div>
+
+        {activeReticleTuning && (
+          <div className="mt-[1.6vh] border-t border-white/7 pt-[1.25vh]">
+            <div className="mb-[0.9vh] font-sans text-[0.76vh] uppercase tracking-[0.18em] text-white/15">
+              {lang === 'ru' ? 'прицел' : 'reticle'}
+            </div>
+            <div className="flex flex-col gap-[1.05vh]">
+              <LabSlider
+                label={lang === 'ru' ? 'Реакция' : 'Reaction'}
+                value={activeReticleTuning.reaction}
+                onChange={(value) => updateReticleTuning('reaction', value)}
+                min={1}
+                max={60}
+              />
+              <LabSlider
+                label={lang === 'ru' ? 'Восстановление' : 'Recovery'}
+                value={activeReticleTuning.recovery}
+                onChange={(value) => updateReticleTuning('recovery', value)}
+                min={1}
+                max={100}
+              />
+              <LabSlider
+                label={
+                  mode === 'pistol'
+                    ? (lang === 'ru' ? 'Макс. радиус' : 'Max radius')
+                    : (lang === 'ru' ? 'Макс. разлёт' : 'Max spread')
+                }
+                value={activeReticleTuning.maxSpread}
+                onChange={(value) => updateReticleTuning('maxSpread', value)}
+                min={mode === 'shotgun' ? 46 : mode === 'automatic' ? 10 : 2}
+                max={mode === 'shotgun' ? 90 : mode === 'automatic' ? 45 : 18}
+                suffix="px"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="mt-[1.2vh] whitespace-pre-line font-mono text-[0.72vh] leading-[1.55] tracking-[0.03em] text-[#343434]">
           {lang === 'ru' ? 'SPACE / ЛКМ — действие\nR — перезарядка' : 'SPACE / LMB — action\nR — reload'}
