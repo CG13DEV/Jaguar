@@ -204,7 +204,7 @@ function AmmoReadout({
   reloading: boolean;
 }) {
   return (
-    <div className="absolute right-[4.8%] top-1/2 flex -translate-y-1/2 items-baseline gap-[6px] font-mono">
+    <div className="absolute right-[4.8%] top-1/2 flex -translate-y-1/2 items-center gap-[7px] font-mono">
       <AnimatePresence mode="wait">
         <motion.span
           key={`${ammo}-${reloading}`}
@@ -212,13 +212,13 @@ function AmmoReadout({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 2 }}
           transition={{ duration: 0.1 }}
-          className={`text-[20px] leading-none ${ammo === 0 ? 'text-[#9c1414]/85' : 'text-white/68'}`}
+          className={`text-[28px] leading-none ${ammo === 0 ? 'text-[#9c1414]/85' : 'text-white/72'}`}
         >
           {reloading ? '–' : ammo}
         </motion.span>
       </AnimatePresence>
-      <span className="text-[10px] text-white/16">·</span>
-      <span className="text-[11px] text-white/26">{reserve}</span>
+      <span className="text-[11px] leading-none text-white/16">·</span>
+      <span className="text-[12px] leading-none text-white/28">{reserve}</span>
     </div>
   );
 }
