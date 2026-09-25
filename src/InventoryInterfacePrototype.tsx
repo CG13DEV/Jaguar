@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, FileText, KeyRound, Package, Plus, Smartphone } from 'lucide-react';
 import { Language } from './App';
-import { getHashEnum, getHashParam, replaceHashParams } from './routeState';
+import { getHashBoolean, getHashEnum, getHashParam, replaceHashParams } from './routeState';
 
 type InventoryTab = 'items' | 'info';
 type InfoKind = 'note' | 'notebook' | 'phone';
@@ -145,6 +145,7 @@ export function InventoryInterfacePrototype({
     return index >= 0 ? index : 0;
   });
   const [contextMenu, setContextMenu] = useState<{ index: number; left: number; top: number } | null>(null);
+  const [showTrunk, setShowTrunk] = useState(() => getHashBoolean('trunk', false));
   const itemsPaneRef = useRef<HTMLDivElement | null>(null);
 
   const activeItem = ITEMS[selectedItem] ?? ITEMS[0];
@@ -155,8 +156,9 @@ export function InventoryInterfacePrototype({
       tab,
       item: activeItem.id,
       info: activeInfo.id,
+      trunk: showTrunk,
     });
-  }, [activeInfo.id, activeItem.id, tab]);
+  }, [activeInfo.id, activeItem.id, showTrunk, tab]);
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
@@ -214,8 +216,50 @@ export function InventoryInterfacePrototype({
                 className="absolute inset-0"
                 onMouseDown={() => setContextMenu(null)}
               >
-                <div className="absolute left-[4.5%] top-[28%] w-[18%]">
-                  <div className="mb-[10px] font-sans text-[8px] uppercase tracking-[0.26em] text-white/18">
+                {/* Optional vehicle / nearby trunk storage. */}
+                <AnimatePresence initial={false}>
+                  {showTrunk && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -12 }}
+                      transition={{ duration: 0.18 }}
+                      className="absolute bottom-[8%] left-[5%] top-[18%] w-[31%]"
+                    >
+                      <div className="mb-[7px] flex items-baseline justify-between">
+                        <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-white/22">
+                          {lang === 'ru' ? 'багажник' : 'trunk'}
+                        </span>
+                        <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">04 / 20</span>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-[5px]">
+                        {['ammo', 'med', 'shells', 'stash'].map((id, index) => (
+                          <div
+                            key={`trunk-${id}`}
+                            className="relative aspect-square flex items-center justify-center border border-white/13 bg-white/[0.012]"
+                          >
+                            <ItemGlyph id={id} />
+                            <span className="absolute bottom-[5px] right-[6px] font-mono text-[8px] text-white/42">
+                              {[36, 2, 12, 4][index]}
+                            </span>
+                          </div>
+                        ))}
+
+                        {Array.from({ length: 16 }, (_, index) => (
+                          <div
+                            key={`trunk-empty-${index}`}
+                            className="aspect-square border border-white/8 bg-white/[0.006]"
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Quick access cross stays independent of both storage grids. */}
+                <div className="absolute left-1/2 top-[31%] w-[16%] -translate-x-1/2">
+                  <div className="mb-[10px] text-center font-sans text-[8px] uppercase tracking-[0.26em] text-white/18">
                     {lang === 'ru' ? 'быстрый доступ' : 'shortcuts'}
                   </div>
                   <div className="grid grid-cols-3 grid-rows-3 gap-[5px]">
@@ -227,15 +271,16 @@ export function InventoryInterfacePrototype({
                   </div>
                 </div>
 
-                <div className="absolute right-[5%] top-[18%] w-[47%]">
+                {/* Personal inventory — exactly 4 × 2 square cells. */}
+                <div className="absolute right-[5%] top-[18%] w-[34%]">
                   <div className="mb-[7px] flex items-baseline justify-between">
                     <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-white/22">
                       {lang === 'ru' ? 'инвентарь' : 'inventory'}
                     </span>
-                    <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">08 / 12</span>
+                    <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">07 / 08</span>
                   </div>
 
-                  <div className="grid grid-cols-4 auto-rows-[62px] gap-[5px]">
+                  <div className="grid grid-cols-4 gap-[5px]">
                     {ITEMS.map((item, index) => {
                       const active = index === selectedItem;
                       return (
@@ -263,9 +308,7 @@ export function InventoryInterfacePrototype({
                                 : { index, left: Math.max(8, left), top: Math.max(8, top) }
                             ));
                           }}
-                          className={`relative flex items-center justify-center border bg-white/[0.012] transition-colors ${
-                            item.span === 2 ? 'col-span-2' : 'col-span-1'
-                          } ${
+                          className={`relative aspect-square flex items-center justify-center border bg-white/[0.012] transition-colors ${
                             active ? 'border-white/62 bg-white/[0.035]' : 'border-white/13 hover:border-white/30'
                           }`}
                         >
@@ -278,9 +321,7 @@ export function InventoryInterfacePrototype({
                       );
                     })}
 
-                    {Array.from({ length: 4 }, (_, index) => (
-                      <div key={`empty-${index}`} className="border border-white/8 bg-white/[0.006]" />
-                    ))}
+                    <div className="aspect-square border border-white/8 bg-white/[0.006]" />
                   </div>
 
                   <AnimatePresence mode="wait">
@@ -412,6 +453,23 @@ export function InventoryInterfacePrototype({
             )}
           </AnimatePresence>
         </div>
+      </div>
+
+      <div className="absolute right-[8vw] top-[27vh] z-20 w-[6vw] min-w-[96px]">
+        <div className="mb-[0.9vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
+          {lang === 'ru' ? 'параметры' : 'parameters'}
+        </div>
+        <label className="flex cursor-pointer items-center justify-between gap-[8px] font-sans">
+          <span className="text-[0.82vh] uppercase tracking-[0.14em] text-white/24">
+            {lang === 'ru' ? 'Багажник' : 'Trunk'}
+          </span>
+          <input
+            type="checkbox"
+            checked={showTrunk}
+            onChange={(event) => setShowTrunk(event.target.checked)}
+            className="h-[11px] w-[11px] cursor-pointer accent-[#9c1414]"
+          />
+        </label>
       </div>
 
       <button
