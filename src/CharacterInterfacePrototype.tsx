@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
 import { getHashEnum, getHashNumber, replaceHashParams } from './routeState';
@@ -56,7 +56,15 @@ function LabSlider({
   );
 }
 
-function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
+function Reticle({
+  mode,
+  pulse,
+  recoil,
+}: {
+  mode: Mode;
+  pulse: number;
+  recoil: number;
+}) {
   if (mode === 'unarmed') return null;
 
   if (mode === 'pistol') {
@@ -76,55 +84,94 @@ function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
 
   if (mode === 'shotgun') {
     const baseGap = 45;
-    const kickGap = 68;
+    const sustainedMaxGap = 62;
+    const absoluteMaxGap = 68;
+    const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
+    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 6));
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2">
-        <motion.i
-          key={`shotgun-left-${pulse}`}
-          initial={{ x: -baseGap, opacity: 0.52 }}
-          animate={{ x: [-baseGap, -kickGap, -baseGap], opacity: [0.52, 0.82, 0.52] }}
-          transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2 bg-white"
-        />
-        <motion.i
-          key={`shotgun-right-${pulse}`}
-          initial={{ x: baseGap, opacity: 0.52 }}
-          animate={{ x: [baseGap, kickGap, baseGap], opacity: [0.52, 0.82, 0.52] }}
-          transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2 bg-white"
-        />
+        <motion.span
+          animate={{ x: -currentGap }}
+          transition={{ duration: 0.09, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2"
+        >
+          <motion.i
+            key={`shotgun-left-${pulse}`}
+            initial={{ x: 0, opacity: 0.52 }}
+            animate={{ x: [0, -shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
+            transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
+            className="block h-full w-px bg-white"
+          />
+        </motion.span>
+
+        <motion.span
+          animate={{ x: currentGap }}
+          transition={{ duration: 0.09, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[14px] w-px -translate-y-1/2"
+        >
+          <motion.i
+            key={`shotgun-right-${pulse}`}
+            initial={{ x: 0, opacity: 0.52 }}
+            animate={{ x: [0, shotKick, 0], opacity: [0.52, 0.82, 0.52] }}
+            transition={{ duration: 0.24, times: [0, 0.24, 1], ease: 'easeOut' }}
+            className="block h-full w-px bg-white"
+          />
+        </motion.span>
       </div>
     );
   }
 
   if (mode === 'automatic') {
     const baseGap = 8;
-    const kickGap = 18;
+    const sustainedMaxGap = 15;
+    const absoluteMaxGap = 18;
+    const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
+    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 3));
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2">
-        <motion.i
-          key={`auto-left-${pulse}`}
-          initial={{ x: -baseGap, opacity: 0.55 }}
-          animate={{ x: [-baseGap, -kickGap, -baseGap], opacity: [0.55, 0.82, 0.55] }}
-          transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2 bg-white"
-        />
-        <motion.i
-          key={`auto-right-${pulse}`}
-          initial={{ x: baseGap, opacity: 0.55 }}
-          animate={{ x: [baseGap, kickGap, baseGap], opacity: [0.55, 0.82, 0.55] }}
-          transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2 bg-white"
-        />
-        <motion.i
-          key={`auto-bottom-${pulse}`}
-          initial={{ y: baseGap, opacity: 0.55 }}
-          animate={{ y: [baseGap, kickGap, baseGap], opacity: [0.55, 0.82, 0.55] }}
-          transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2 bg-white"
-        />
+        <motion.span
+          animate={{ x: -currentGap }}
+          transition={{ duration: 0.08, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2"
+        >
+          <motion.i
+            key={`auto-left-${pulse}`}
+            initial={{ x: 0, opacity: 0.55 }}
+            animate={{ x: [0, -shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
+            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+            className="block h-px w-[5px] bg-white"
+          />
+        </motion.span>
+
+        <motion.span
+          animate={{ x: currentGap }}
+          transition={{ duration: 0.08, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2"
+        >
+          <motion.i
+            key={`auto-right-${pulse}`}
+            initial={{ x: 0, opacity: 0.55 }}
+            animate={{ x: [0, shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
+            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+            className="block h-px w-[5px] bg-white"
+          />
+        </motion.span>
+
+        <motion.span
+          animate={{ y: currentGap }}
+          transition={{ duration: 0.08, ease: 'easeOut' }}
+          className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2"
+        >
+          <motion.i
+            key={`auto-bottom-${pulse}`}
+            initial={{ y: 0, opacity: 0.55 }}
+            animate={{ y: [0, shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
+            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+            className="block h-[5px] w-px bg-white"
+          />
+        </motion.span>
       </div>
     );
   }
@@ -238,7 +285,9 @@ export function CharacterInterfacePrototype({
   const [health, setHealth] = useState(() => getHashNumber('hp', 100, 0, 100));
   const [stamina, setStamina] = useState(() => getHashNumber('st', 100, 0, 100));
   const [pulse, setPulse] = useState(0);
+  const [recoil, setRecoil] = useState(0);
   const [reloading, setReloading] = useState(false);
+  const lastShotAtRef = useRef(0);
 
   const config = useMemo(() => MODES.find((item) => item.id === mode) ?? MODES[0], [mode]);
 
@@ -259,6 +308,8 @@ export function CharacterInterfacePrototype({
     setReserve(next.reserve ?? 0);
     setReloading(false);
     setPulse(0);
+    setRecoil(0);
+    lastShotAtRef.current = 0;
   }, []);
 
   const action = useCallback(() => {
@@ -269,7 +320,14 @@ export function CharacterInterfacePrototype({
         setPulse((value) => value + 1);
         return;
       }
+
       setAmmo((value) => value - 1);
+
+      if (mode === 'automatic' || mode === 'shotgun') {
+        lastShotAtRef.current = performance.now();
+        const recoilStep = mode === 'automatic' ? 0.2 : 0.42;
+        setRecoil((value) => Math.min(1, value + recoilStep));
+      }
     }
 
     if (mode === 'melee') {
@@ -278,6 +336,23 @@ export function CharacterInterfacePrototype({
 
     setPulse((value) => value + 1);
   }, [ammo, config.magazine, mode, reloading]);
+
+  useEffect(() => {
+    if (mode !== 'automatic' && mode !== 'shotgun') {
+      setRecoil(0);
+      return;
+    }
+
+    const decayDelay = mode === 'automatic' ? 150 : 220;
+    const decayStep = mode === 'automatic' ? 0.035 : 0.045;
+
+    const timer = window.setInterval(() => {
+      if (performance.now() - lastShotAtRef.current < decayDelay) return;
+      setRecoil((value) => Math.max(0, value - decayStep));
+    }, 50);
+
+    return () => window.clearInterval(timer);
+  }, [mode]);
 
   const reload = useCallback(() => {
     if (!config.magazine || reloading || ammo >= config.magazine || reserve <= 0) return;
@@ -351,7 +426,7 @@ export function CharacterInterfacePrototype({
             if (event.button === 0) action();
           }}
         >
-          <Reticle mode={mode} pulse={pulse} />
+          <Reticle mode={mode} pulse={pulse} recoil={recoil} />
           <ResourceLines health={health} stamina={stamina} />
 
           {config.magazine && (
