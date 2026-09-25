@@ -225,24 +225,24 @@ function PrimaryReadout({
   const rpmDanger = rpm >= 84;
 
   return (
-    <div className="grid w-[128px] grid-cols-[38px_1fr] items-end gap-[10px]">
+    <div className="grid h-[48px] w-[126px] grid-cols-[38px_78px] items-center gap-[10px]">
       <motion.div
         key={gear}
         initial={{ opacity: 0, y: -3 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.1 }}
-        className="flex h-[46px] items-end font-mono text-[39px] font-light leading-[0.78] text-white/76"
+        className="flex h-full items-center justify-start font-mono text-[39px] font-light leading-none text-white/76"
       >
         {gear}
       </motion.div>
 
-      <div className="flex h-[46px] w-full flex-col justify-end">
-        <div className="flex h-[24px] w-full items-baseline justify-between font-mono">
+      <div className="flex h-full w-[78px] flex-col justify-center">
+        <div className="flex w-full items-baseline justify-start gap-[3px] font-mono">
           <span className="text-[21px] font-light leading-none text-white/60">{speed}</span>
-          <span className="text-[6px] uppercase tracking-[0.12em] text-white/16">km/h</span>
+          <span className="text-[6px] uppercase tracking-[0.08em] text-white/16">km/h</span>
         </div>
 
-        <div className="mt-[5px] w-full">
+        <div className="mt-[6px] w-[78px]">
           <div className="mb-[3px] flex w-full items-center justify-between font-mono text-[6px] uppercase tracking-[0.1em] text-white/16">
             <span>rpm</span>
             <span>{rpm}</span>
@@ -351,7 +351,7 @@ export function VehicleInterfacePrototype({
         </div>
       </div>
 
-      <div className="vehicle-controls-scroll absolute bottom-[17vh] right-[8vw] top-[21vh] z-20 w-[5.7vw] min-w-[94px] overflow-y-auto pr-[9px]">
+      <div className="vehicle-controls-scroll absolute bottom-[17vh] right-[3.5vw] top-[21vh] z-20 w-[8vw] min-w-[132px] overflow-y-auto pr-[18px]">
         <div className="mb-[1vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
           {lang === 'ru' ? 'параметры' : 'parameters'}
         </div>
