@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, FileText, KeyRound, Package, Plus, Smartphone } from 'lucide-react';
 import { Language } from './App';
 import { getHashBoolean, getHashEnum, getHashParam, replaceHashParams } from './routeState';
+import { ScaledHudCanvas } from './ScaledHudCanvas';
 
 type InventoryTab = 'items' | 'info';
 type InfoKind = 'note' | 'notebook' | 'phone';
@@ -55,11 +56,11 @@ const INFO = [
 ];
 
 function ItemGlyph({ id }: { id: string }) {
-  const iconClass = "h-[34px] w-[34px] text-white/42 max-md:scale-[0.4]";
+  const iconClass = "h-[34px] w-[34px] text-white/42";
 
   if (id === 'pistol') {
     return (
-      <svg viewBox="0 0 120 64" className="h-[46px] w-[104px] text-white/45 max-md:scale-[0.4]" aria-hidden="true">
+      <svg viewBox="0 0 120 64" className="h-[46px] w-[104px] text-white/45" aria-hidden="true">
         <path d="M10 16h78v15H59l-4 8H41l3-8H10z" fill="currentColor" opacity="0.34" />
         <path d="M44 31h24l-8 26H42l4-18h-8z" fill="currentColor" opacity="0.26" />
         <path d="M88 19h20v8H88" fill="none" stroke="currentColor" strokeWidth="3" />
@@ -70,7 +71,7 @@ function ItemGlyph({ id }: { id: string }) {
 
   if (id === 'ammo') {
     return (
-      <svg viewBox="0 0 72 54" className="h-[38px] w-[58px] text-white/42 max-md:scale-[0.4]" aria-hidden="true">
+      <svg viewBox="0 0 72 54" className="h-[38px] w-[58px] text-white/42" aria-hidden="true">
         {[10, 28, 46].map((x) => (
           <g key={x}>
             <path d={`M${x} 17l6-8 6 8v25H${x}z`} fill="currentColor" opacity="0.2" />
@@ -84,7 +85,7 @@ function ItemGlyph({ id }: { id: string }) {
 
   if (id === 'knife') {
     return (
-      <svg viewBox="0 0 110 42" className="h-[34px] w-[92px] text-white/42 max-md:scale-[0.4]" aria-hidden="true">
+      <svg viewBox="0 0 110 42" className="h-[34px] w-[92px] text-white/42" aria-hidden="true">
         <path d="M9 28L72 8 62 26 29 34z" fill="currentColor" opacity="0.26" />
         <path d="M9 28L72 8 62 26 29 34z" fill="none" stroke="currentColor" strokeWidth="2.2" />
         <path d="M62 26h34v10H58z" fill="currentColor" opacity="0.18" stroke="currentColor" strokeWidth="2" />
@@ -94,19 +95,19 @@ function ItemGlyph({ id }: { id: string }) {
 
   if (id === 'med') {
     return (
-      <div className="flex h-[40px] w-[52px] items-center justify-center rounded-[2px] border border-white/22 bg-white/[0.025] max-md:scale-[0.4]">
+      <div className="flex h-[40px] w-[52px] items-center justify-center rounded-[2px] border border-white/22 bg-white/[0.025]">
         <Plus className="h-[24px] w-[24px] text-[#9c1414]/80" strokeWidth={1.8} />
       </div>
     );
   }
 
   if (id === 'keys') {
-    return <KeyRound className="h-[42px] w-[42px] text-white/40 max-md:scale-[0.4]" strokeWidth={1.45} />;
+    return <KeyRound className="h-[42px] w-[42px] text-white/40" strokeWidth={1.45} />;
   }
 
   if (id === 'shells') {
     return (
-      <svg viewBox="0 0 58 54" className="h-[40px] w-[46px] text-white/42 max-md:scale-[0.4]" aria-hidden="true">
+      <svg viewBox="0 0 58 54" className="h-[40px] w-[46px] text-white/42" aria-hidden="true">
         <path d="M8 9h15v34H8zM34 9h15v34H34z" fill="currentColor" opacity="0.14" stroke="currentColor" strokeWidth="2" />
         <path d="M8 36h15v9H8zM34 36h15v9H34z" fill="#9c1414" opacity="0.52" />
         <path d="M11 6h9M37 6h9" stroke="currentColor" strokeWidth="2" />
@@ -193,8 +194,9 @@ export function InventoryInterfacePrototype({
         <div
           id="hud-preview-viewport"
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)] max-md:!w-full"
-          style={{ width: viewportWidth, aspectRatio: viewportAspect, containerType: 'inline-size' }}
+          style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
+          <ScaledHudCanvas ratio={viewportRatio}>
           <div className="absolute left-1/2 top-[5%] z-20 flex -translate-x-1/2 items-center gap-[28px]">
             {(['items', 'info'] as InventoryTab[]).map((item) => (
               <button
@@ -315,11 +317,15 @@ export function InventoryInterfacePrototype({
 
                             const menuWidth = 126;
                             const gap = 8;
-                            const fitsRight = cellRect.right + gap + menuWidth <= paneRect.right;
+                            const paneScale = paneRect.width / itemsPaneRef.current.offsetWidth;
+                            const cellLeft = (cellRect.left - paneRect.left) / paneScale;
+                            const cellRight = (cellRect.right - paneRect.left) / paneScale;
+                            const paneWidth = itemsPaneRef.current.offsetWidth;
+                            const fitsRight = cellRight + gap + menuWidth <= paneWidth;
                             const left = fitsRight
-                              ? cellRect.right - paneRect.left + gap
-                              : cellRect.left - paneRect.left - menuWidth - gap;
-                            const top = cellRect.top - paneRect.top;
+                              ? cellRight + gap
+                              : cellLeft - menuWidth - gap;
+                            const top = (cellRect.top - paneRect.top) / paneScale;
 
                             setContextMenu((current) => (
                               current?.index === index
@@ -473,6 +479,7 @@ export function InventoryInterfacePrototype({
               </motion.div>
             )}
           </AnimatePresence>
+          </ScaledHudCanvas>
         </div>
       </div>
 
