@@ -154,7 +154,7 @@ function MapRadar({
       <motion.div
         animate={{ rotate: relativeTarget }}
         transition={{ duration: 0.18, ease: 'easeOut' }}
-        className="absolute left-1/2 top-[-46px] h-[13px] w-[13px] -translate-x-1/2"
+        className="absolute left-1/2 top-[-30px] h-[13px] w-[13px] -translate-x-1/2"
       >
         <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[3px] border-b-[9px] border-x-transparent border-b-[#9c1414]/82" />
       </motion.div>
