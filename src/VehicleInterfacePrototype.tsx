@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
+import { getHashBoolean, getHashEnum, getHashNumber, replaceHashParams } from './routeState';
 
 interface VehicleInterfacePrototypeProps {
   onBack: () => void;
@@ -222,21 +223,22 @@ export function VehicleInterfacePrototype({
   embedded = false,
   viewportRatio = '16:9',
 }: VehicleInterfacePrototypeProps) {
-  const [speed, setSpeed] = useState(72);
-  const [rpm, setRpm] = useState(42);
-  const [fuel, setFuel] = useState(68);
-  const [throttle, setThrottle] = useState(36);
-  const [brake, setBrake] = useState(0);
-  const [clutch, setClutch] = useState(0);
-  const [steering, setSteering] = useState(12);
-  const [carDamage, setCarDamage] = useState(12);
-  const [driverDamage, setDriverDamage] = useState(4);
-  const [cargoDamage, setCargoDamage] = useState(7);
-  const [heading, setHeading] = useState(38);
-  const [gearIndex, setGearIndex] = useState(4);
-  const [showInputs, setShowInputs] = useState(true);
-  const [targetDirection, setTargetDirection] = useState(72);
-  const [timer, setTimer] = useState(68);
+  const initialGear = getHashEnum('gear', GEARS, '3');
+  const [speed, setSpeed] = useState(() => getHashNumber('speed', 72, 0, 220));
+  const [rpm, setRpm] = useState(() => getHashNumber('rpm', 42, 0, 100));
+  const [fuel, setFuel] = useState(() => getHashNumber('fuel', 68, 0, 100));
+  const [throttle, setThrottle] = useState(() => getHashNumber('throttle', 36, 0, 100));
+  const [brake, setBrake] = useState(() => getHashNumber('brake', 0, 0, 100));
+  const [clutch, setClutch] = useState(() => getHashNumber('clutch', 0, 0, 100));
+  const [steering, setSteering] = useState(() => getHashNumber('steering', 12, -100, 100));
+  const [carDamage, setCarDamage] = useState(() => getHashNumber('car', 12, 0, 100));
+  const [driverDamage, setDriverDamage] = useState(() => getHashNumber('driver', 4, 0, 100));
+  const [cargoDamage, setCargoDamage] = useState(() => getHashNumber('cargo', 7, 0, 100));
+  const [heading, setHeading] = useState(() => getHashNumber('heading', 38, 0, 359));
+  const [gearIndex, setGearIndex] = useState(() => Math.max(0, GEARS.indexOf(initialGear)));
+  const [showInputs, setShowInputs] = useState(() => getHashBoolean('inputs', true));
+  const [targetDirection, setTargetDirection] = useState(() => getHashNumber('target', 72, 0, 359));
+  const [timer, setTimer] = useState(() => getHashNumber('timer', 68, 0, 100));
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
@@ -246,6 +248,42 @@ export function VehicleInterfacePrototype({
       : 'min(72vw, calc(67vh * 16 / 9))';
 
   const gear = GEARS[gearIndex] ?? 'N';
+
+  useEffect(() => {
+    replaceHashParams({
+      speed,
+      rpm,
+      fuel,
+      throttle,
+      brake,
+      clutch,
+      steering,
+      car: carDamage,
+      driver: driverDamage,
+      cargo: cargoDamage,
+      heading,
+      gear,
+      inputs: showInputs,
+      target: targetDirection,
+      timer,
+    });
+  }, [
+    brake,
+    carDamage,
+    cargoDamage,
+    clutch,
+    driverDamage,
+    fuel,
+    gear,
+    heading,
+    rpm,
+    showInputs,
+    speed,
+    steering,
+    targetDirection,
+    throttle,
+    timer,
+  ]);
 
   return (
     <motion.div

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
+import { getHashEnum, getHashNumber, replaceHashParams } from './routeState';
 
 type Mode = 'unarmed' | 'pistol' | 'shotgun' | 'automatic' | 'melee' | 'drugged';
 
@@ -10,6 +11,8 @@ interface CharacterInterfacePrototypeProps {
   embedded?: boolean;
   viewportRatio?: '16:9' | '21:9' | '32:9';
 }
+
+const MODE_IDS: Mode[] = ['unarmed', 'pistol', 'shotgun', 'automatic', 'melee', 'drugged'];
 
 const MODES: Array<{
   id: Mode;
@@ -226,15 +229,28 @@ export function CharacterInterfacePrototype({
   embedded = false,
   viewportRatio = '16:9',
 }: CharacterInterfacePrototypeProps) {
-  const [mode, setMode] = useState<Mode>('pistol');
-  const [ammo, setAmmo] = useState(8);
-  const [reserve, setReserve] = useState(24);
-  const [health, setHealth] = useState(100);
-  const [stamina, setStamina] = useState(100);
+  const initialMode = getHashEnum<Mode>('mode', MODE_IDS, 'pistol');
+  const initialConfig = MODES.find((item) => item.id === initialMode) ?? MODES[1];
+
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [ammo, setAmmo] = useState(() => getHashNumber('ammo', initialConfig.magazine ?? 0, 0, 999));
+  const [reserve, setReserve] = useState(() => getHashNumber('reserve', initialConfig.reserve ?? 0, 0, 999));
+  const [health, setHealth] = useState(() => getHashNumber('hp', 100, 0, 100));
+  const [stamina, setStamina] = useState(() => getHashNumber('st', 100, 0, 100));
   const [pulse, setPulse] = useState(0);
   const [reloading, setReloading] = useState(false);
 
   const config = useMemo(() => MODES.find((item) => item.id === mode) ?? MODES[0], [mode]);
+
+  useEffect(() => {
+    replaceHashParams({
+      mode,
+      hp: health,
+      st: stamina,
+      ammo: config.magazine ? ammo : null,
+      reserve: config.magazine ? reserve : null,
+    });
+  }, [ammo, config.magazine, health, mode, reserve, stamina]);
 
   const selectMode = useCallback((nextMode: Mode) => {
     const next = MODES.find((item) => item.id === nextMode) ?? MODES[0];

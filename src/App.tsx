@@ -12,69 +12,74 @@ import { GameplayScreen } from './GameplayScreen';
 import { TechnologyScreen } from './TechnologyScreen';
 import { SocialsScreen } from './SocialsScreen';
 import { InterfacesScreen } from './InterfacesScreen';
+import {
+  parseHashRoute,
+  pushHashRoute,
+  replaceHashParams,
+  replaceHashRoute,
+  type RouteScreen,
+} from './routeState';
 
 export type Language = 'ru' | 'en';
-type Screen = 'main' | 'history' | 'gameplay' | 'interfaces' | 'technology' | 'authors' | 'socials';
+type Screen = RouteScreen;
 
 const SCREENS_BY_MENU_INDEX: Screen[] = ['history', 'gameplay', 'interfaces', 'technology', 'authors', 'socials'];
 
-const isScreen = (value: unknown): value is Screen => (
-  value === 'main' ||
-  value === 'history' ||
-  value === 'gameplay' ||
-  value === 'interfaces' ||
-  value === 'technology' ||
-  value === 'authors' ||
-  value === 'socials'
-);
-
 export default function App() {
+  const initialRoute = parseHashRoute();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('main');
-  const [lang, setLang] = useState<Language>('ru');
+  const [currentScreen, setCurrentScreen] = useState<Screen>(initialRoute.screen);
+  const [lang, setLang] = useState<Language>(initialRoute.params.get('lang') === 'en' ? 'en' : 'ru');
 
   const menuItems = {
-    ru: [
-      "История",
-      "Геймплей",
-      "Интерфейсы",
-      "Технологии",
-      "Авторы",
-      "Социальные сети"
-    ],
-    en: [
-      "History",
-      "Gameplay",
-      "Interfaces",
-      "Technology",
-      "Authors",
-      "Socials"
-    ]
+    ru: ['История', 'Геймплей', 'Интерфейсы', 'Технологии', 'Авторы', 'Социальные сети'],
+    en: ['History', 'Gameplay', 'Interfaces', 'Technology', 'Authors', 'Socials'],
   };
 
   const currentMenu = menuItems[lang];
 
   useEffect(() => {
-    window.history.replaceState({ screen: 'main' }, '', window.location.href);
+    const syncFromLocation = () => {
+      const route = parseHashRoute();
+      setCurrentScreen(route.screen);
+      setLang(route.params.get('lang') === 'en' ? 'en' : 'ru');
 
-    const handlePopState = (event: PopStateEvent) => {
-      const nextScreen = event.state && isScreen(event.state.screen) ? event.state.screen : 'main';
-      setCurrentScreen(nextScreen);
+      const menuIndex = SCREENS_BY_MENU_INDEX.indexOf(route.screen);
+      if (menuIndex >= 0) setSelectedIndex(menuIndex);
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    if (!window.location.hash) {
+      const params = new URLSearchParams();
+      params.set('lang', lang);
+      replaceHashRoute('main', undefined, params);
+    } else {
+      syncFromLocation();
+    }
+
+    window.addEventListener('popstate', syncFromLocation);
+    window.addEventListener('hashchange', syncFromLocation);
+    return () => {
+      window.removeEventListener('popstate', syncFromLocation);
+      window.removeEventListener('hashchange', syncFromLocation);
+    };
   }, []);
 
   const navigateToScreen = useCallback((screen: Screen) => {
+    const params = new URLSearchParams();
+    params.set('lang', lang);
+    pushHashRoute(screen, screen === 'interfaces' ? 'character' : undefined, params);
     setCurrentScreen(screen);
-    window.history.pushState({ screen }, '', window.location.href);
-  }, []);
+  }, [lang]);
 
   const navigateBack = useCallback(() => {
     if (currentScreen === 'main') return;
     window.history.back();
   }, [currentScreen]);
+
+  const setLanguage = useCallback((next: Language) => {
+    setLang(next);
+    replaceHashParams({ lang: next });
+  }, []);
 
   useEffect(() => {
     if (currentScreen !== 'main') return;
@@ -97,7 +102,7 @@ export default function App() {
     <>
       <AnimatePresence mode="wait">
         {currentScreen === 'main' && (
-          <motion.div 
+          <motion.div
             key="main"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -105,12 +110,10 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="fixed inset-0 bg-[#0d0d0d] overflow-hidden select-none"
           >
-            {/* Logo Area */}
             <div className="absolute top-[11%] left-[3.5%] w-[28%] min-w-[250px] max-w-[600px]">
               <Logo />
             </div>
 
-            {/* Main Menu Area */}
             <div className="absolute bottom-[13%] left-[3.5%] flex flex-col items-start gap-[1vh]">
               {currentMenu.map((item, index) => (
                 <button
@@ -121,14 +124,11 @@ export default function App() {
                     navigateToScreen(SCREENS_BY_MENU_INDEX[index]);
                   }}
                   className={`text-left font-oswald text-[4.8vh] leading-[1.1] tracking-wide transition-colors duration-200 font-light ${
-                    selectedIndex === index 
-                      ? 'text-[#9c1414]' 
+                    selectedIndex === index
+                      ? 'text-[#9c1414]'
                       : 'text-[#b0b0b0] hover:text-[#e0e0e0]'
                   }`}
-                  style={{
-                    transform: 'scaleY(1.2)',
-                    transformOrigin: 'left center',
-                  }}
+                  style={{ transform: 'scaleY(1.2)', transformOrigin: 'left center' }}
                 >
                   {item}
                 </button>
@@ -145,17 +145,16 @@ export default function App() {
         {currentScreen === 'socials' && <SocialsScreen onBack={navigateBack} lang={lang} />}
       </AnimatePresence>
 
-      {/* Language Switcher */}
       <div className="fixed top-[6vh] right-[8vw] z-50 flex gap-[0.5vw] font-oswald text-[2.5vh] uppercase tracking-wider">
-        <button 
-          onClick={() => setLang('ru')} 
+        <button
+          onClick={() => setLanguage('ru')}
           className={`transition-colors duration-300 ${lang === 'ru' ? 'text-[#9c1414] drop-shadow-[0_0_5px_rgba(156,20,20,0.8)]' : 'text-[#666] hover:text-[#c0c0c0]'}`}
         >
           RU
         </button>
         <span className="text-[#333]">/</span>
-        <button 
-          onClick={() => setLang('en')} 
+        <button
+          onClick={() => setLanguage('en')}
           className={`transition-colors duration-300 ${lang === 'en' ? 'text-[#9c1414] drop-shadow-[0_0_5px_rgba(156,20,20,0.8)]' : 'text-[#666] hover:text-[#c0c0c0]'}`}
         >
           EN

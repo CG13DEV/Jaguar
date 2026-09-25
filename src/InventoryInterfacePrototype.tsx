@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, FileText, KeyRound, Package, Plus, Smartphone } from 'lucide-react';
 import { Language } from './App';
+import { getHashEnum, getHashParam, replaceHashParams } from './routeState';
 
 type InventoryTab = 'items' | 'info';
 type InfoKind = 'note' | 'notebook' | 'phone';
@@ -132,14 +133,30 @@ export function InventoryInterfacePrototype({
   embedded = false,
   viewportRatio = '16:9',
 }: InventoryInterfacePrototypeProps) {
-  const [tab, setTab] = useState<InventoryTab>('items');
-  const [selectedItem, setSelectedItem] = useState(0);
-  const [selectedInfo, setSelectedInfo] = useState(0);
+  const initialItemId = getHashParam('item');
+  const initialInfoId = getHashParam('info');
+  const [tab, setTab] = useState<InventoryTab>(() => getHashEnum('tab', ['items', 'info'] as const, 'items'));
+  const [selectedItem, setSelectedItem] = useState(() => {
+    const index = ITEMS.findIndex((item) => item.id === initialItemId);
+    return index >= 0 ? index : 0;
+  });
+  const [selectedInfo, setSelectedInfo] = useState(() => {
+    const index = INFO.findIndex((item) => item.id === initialInfoId);
+    return index >= 0 ? index : 0;
+  });
   const [contextMenu, setContextMenu] = useState<{ index: number; left: number; top: number } | null>(null);
   const itemsPaneRef = useRef<HTMLDivElement | null>(null);
 
   const activeItem = ITEMS[selectedItem] ?? ITEMS[0];
   const activeInfo = useMemo(() => INFO[selectedInfo] ?? INFO[0], [selectedInfo]);
+
+  useEffect(() => {
+    replaceHashParams({
+      tab,
+      item: activeItem.id,
+      info: activeInfo.id,
+    });
+  }, [activeInfo.id, activeItem.id, tab]);
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'

@@ -5,8 +5,15 @@ import { Language } from './App';
 import { CharacterInterfacePrototype } from './CharacterInterfacePrototype';
 import { VehicleInterfacePrototype } from './VehicleInterfacePrototype';
 import { InventoryInterfacePrototype } from './InventoryInterfacePrototype';
+import {
+  getHashEnum,
+  parseHashRoute,
+  pushHashRoute,
+  replaceHashParams,
+  type InterfaceRouteSection,
+} from './routeState';
 
-type InterfaceSection = 'character' | 'vehicle' | 'inventory';
+type InterfaceSection = InterfaceRouteSection;
 export type ViewportRatio = '16:9' | '21:9' | '32:9';
 
 interface InterfacesScreenProps {
@@ -24,26 +31,60 @@ const RATIOS: ViewportRatio[] = ['16:9', '21:9', '32:9'];
 const SWIPE_THRESHOLD_PX = 48;
 
 export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
-  const [sectionIndex, setSectionIndex] = useState(0);
-  const [viewportRatio, setViewportRatio] = useState<ViewportRatio>('16:9');
+  const initialRoute = parseHashRoute();
+  const initialSectionIndex = Math.max(0, SECTIONS.findIndex((item) => item.id === initialRoute.section));
+  const [sectionIndex, setSectionIndex] = useState(initialSectionIndex);
+  const [viewportRatio, setViewportRatio] = useState<ViewportRatio>(() => getHashEnum('ratio', RATIOS, '16:9'));
   const [isFullscreen, setIsFullscreen] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const activeSection = SECTIONS[sectionIndex];
 
+  const goToSection = useCallback((index: number) => {
+    if (index < 0 || index >= SECTIONS.length) return;
+    const section = SECTIONS[index];
+
+    const params = new URLSearchParams();
+    params.set('lang', lang);
+    params.set('ratio', viewportRatio);
+
+    pushHashRoute('interfaces', section.id, params);
+    setSectionIndex(index);
+  }, [lang, viewportRatio]);
+
   const moveSection = useCallback((direction: number) => {
-    setSectionIndex((current) => {
-      const next = current + direction;
-      if (next < 0 || next >= SECTIONS.length) return current;
-      return next;
-    });
+    goToSection(sectionIndex + direction);
+  }, [goToSection, sectionIndex]);
+
+  const changeRatio = useCallback((ratio: ViewportRatio) => {
+    setViewportRatio(ratio);
+    replaceHashParams({ ratio });
   }, []);
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
+    const syncFromLocation = () => {
+      const route = parseHashRoute();
+      if (route.screen !== 'interfaces') return;
+
+      const index = SECTIONS.findIndex((item) => item.id === route.section);
+      if (index >= 0) setSectionIndex(index);
+
+      const ratio = route.params.get('ratio');
+      if (ratio && RATIOS.includes(ratio as ViewportRatio)) {
+        setViewportRatio(ratio as ViewportRatio);
+      }
     };
 
+    window.addEventListener('popstate', syncFromLocation);
+    window.addEventListener('hashchange', syncFromLocation);
+    return () => {
+      window.removeEventListener('popstate', syncFromLocation);
+      window.removeEventListener('hashchange', syncFromLocation);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
@@ -55,9 +96,7 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
     }
 
     const viewport = document.getElementById('hud-preview-viewport');
-    if (viewport?.requestFullscreen) {
-      await viewport.requestFullscreen();
-    }
+    if (viewport?.requestFullscreen) await viewport.requestFullscreen();
   }, []);
 
   useEffect(() => {
@@ -71,7 +110,7 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
         return;
       }
 
-      if (event.target instanceof HTMLInputElement) return;
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) return;
 
       if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') {
         moveSection(-1);
@@ -166,7 +205,7 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
           return (
             <button
               key={item.id}
-              onClick={() => setSectionIndex(index)}
+              onClick={() => goToSection(index)}
               className="flex items-center justify-center px-[1vw] py-[1vh] focus:outline-none"
               aria-label={lang === 'ru' ? item.ru : item.en}
             >
@@ -182,19 +221,19 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
 
       <div className="absolute bottom-[6vh] left-[8vw] z-40 flex items-center gap-[1.2vw]">
         <div className="flex items-center font-oswald text-[2vh] tracking-widest">
-        {RATIOS.map((ratio, index) => (
-          <span key={ratio} className="flex items-center">
-            <button
-              onClick={() => setViewportRatio(ratio)}
-              className={`transition-colors duration-300 focus:outline-none ${
-                viewportRatio === ratio ? 'text-[#9c1414]' : 'text-[#555] hover:text-[#c0c0c0]'
-              }`}
-            >
-              {ratio}
-            </button>
-            {index < RATIOS.length - 1 && <span className="mx-[0.65vw] text-[#333]">|</span>}
-          </span>
-        ))}
+          {RATIOS.map((ratio, index) => (
+            <span key={ratio} className="flex items-center">
+              <button
+                onClick={() => changeRatio(ratio)}
+                className={`transition-colors duration-300 focus:outline-none ${
+                  viewportRatio === ratio ? 'text-[#9c1414]' : 'text-[#555] hover:text-[#c0c0c0]'
+                }`}
+              >
+                {ratio}
+              </button>
+              {index < RATIOS.length - 1 && <span className="mx-[0.65vw] text-[#333]">|</span>}
+            </span>
+          ))}
         </div>
 
         <button
