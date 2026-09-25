@@ -69,35 +69,36 @@ function Reticle({
 
   if (mode === 'pistol') {
     return (
-      <div className="absolute left-1/2 top-1/2 h-[20px] w-[20px] -translate-x-1/2 -translate-y-1/2">
+      <svg
+        viewBox="0 0 24 24"
+        className="absolute left-1/2 top-1/2 h-[24px] w-[24px] -translate-x-1/2 -translate-y-1/2 overflow-visible"
+        aria-hidden="true"
+      >
         {pulse === 0 ? (
-          <i className="absolute left-1/2 top-1/2 h-[2px] w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/72" />
+          <circle cx="12" cy="12" r="1" fill="rgba(255,255,255,0.72)" />
         ) : (
-          <motion.i
+          <motion.circle
             key={`pistol-shot-${pulse}`}
-            initial={{
-              width: 2,
-              height: 2,
-              backgroundColor: 'rgba(255,255,255,0.72)',
-            }}
+            cx="12"
+            cy="12"
+            initial={{ r: 1, fillOpacity: 1, strokeOpacity: 0 }}
             animate={{
-              width: [2, 15, 2],
-              height: [2, 15, 2],
-              backgroundColor: [
-                'rgba(255,255,255,0.72)',
-                'rgba(255,255,255,0)',
-                'rgba(255,255,255,0.72)',
-              ],
+              r: [1, 9, 1],
+              fillOpacity: [1, 0, 1],
+              strokeOpacity: [0, 0.78, 0],
             }}
             transition={{
-              duration: 0.28,
-              times: [0, 0.42, 1],
+              duration: 0.38,
+              times: [0, 0.46, 1],
               ease: 'easeOut',
             }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/55"
+            fill="white"
+            stroke="white"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
           />
         )}
-      </div>
+      </svg>
     );
   }
 
@@ -143,51 +144,57 @@ function Reticle({
 
   if (mode === 'automatic') {
     const baseGap = 8;
-    const sustainedMaxGap = 20;
-    const absoluteMaxGap = 25;
-    const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
-    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 5));
+    const maxGap = 30;
+    const currentGap = baseGap + (maxGap - baseGap) * recoil;
+    const remainingOutward = Math.max(0, maxGap - currentGap);
+    const outwardKick = Math.min(6, remainingOutward);
+    const atLimit = remainingOutward < 0.75;
+    const limitReaction = 2.5;
+
+    const leftPulse = atLimit ? [0, limitReaction, 0] : [0, -outwardKick, 0];
+    const rightPulse = atLimit ? [0, -limitReaction, 0] : [0, outwardKick, 0];
+    const bottomPulse = atLimit ? [0, -limitReaction, 0] : [0, outwardKick, 0];
 
     return (
-      <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 top-1/2 h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 overflow-visible">
         <motion.span
           animate={{ x: -currentGap }}
-          transition={{ duration: 0.08, ease: 'easeOut' }}
+          transition={{ duration: 0.07, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-x-full -translate-y-1/2"
         >
           <motion.i
             key={`auto-left-${pulse}`}
             initial={{ x: 0, opacity: 0.55 }}
-            animate={{ x: [0, -shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
-            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+            animate={{ x: leftPulse, opacity: [0.55, 0.86, 0.55] }}
+            transition={{ duration: 0.19, times: [0, 0.26, 1], ease: 'easeOut' }}
             className="block h-px w-[5px] bg-white"
           />
         </motion.span>
 
         <motion.span
           animate={{ x: currentGap }}
-          transition={{ duration: 0.08, ease: 'easeOut' }}
+          transition={{ duration: 0.07, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-px w-[5px] -translate-y-1/2"
         >
           <motion.i
             key={`auto-right-${pulse}`}
             initial={{ x: 0, opacity: 0.55 }}
-            animate={{ x: [0, shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
-            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+            animate={{ x: rightPulse, opacity: [0.55, 0.86, 0.55] }}
+            transition={{ duration: 0.19, times: [0, 0.26, 1], ease: 'easeOut' }}
             className="block h-px w-[5px] bg-white"
           />
         </motion.span>
 
         <motion.span
           animate={{ y: currentGap }}
-          transition={{ duration: 0.08, ease: 'easeOut' }}
+          transition={{ duration: 0.07, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-[5px] w-px -translate-x-1/2"
         >
           <motion.i
             key={`auto-bottom-${pulse}`}
             initial={{ y: 0, opacity: 0.55 }}
-            animate={{ y: [0, shotKick, 0], opacity: [0.55, 0.82, 0.55] }}
-            transition={{ duration: 0.18, times: [0, 0.28, 1], ease: 'easeOut' }}
+            animate={{ y: bottomPulse, opacity: [0.55, 0.86, 0.55] }}
+            transition={{ duration: 0.19, times: [0, 0.26, 1], ease: 'easeOut' }}
             className="block h-[5px] w-px bg-white"
           />
         </motion.span>
@@ -344,7 +351,7 @@ export function CharacterInterfacePrototype({
 
       if (mode === 'automatic' || mode === 'shotgun') {
         lastShotAtRef.current = performance.now();
-        const recoilStep = mode === 'automatic' ? 0.3 : 0.42;
+        const recoilStep = mode === 'automatic' ? 0.38 : 0.42;
         setRecoil((value) => Math.min(1, value + recoilStep));
       }
     }
@@ -362,8 +369,8 @@ export function CharacterInterfacePrototype({
       return;
     }
 
-    const decayDelay = mode === 'automatic' ? 150 : 220;
-    const decayStep = mode === 'automatic' ? 0.035 : 0.045;
+    const decayDelay = mode === 'automatic' ? 260 : 220;
+    const decayStep = mode === 'automatic' ? 0.022 : 0.045;
 
     const timer = window.setInterval(() => {
       if (performance.now() - lastShotAtRef.current < decayDelay) return;
