@@ -50,22 +50,22 @@ body {
 
 .vehicle-controls-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(156, 20, 20, 0.55) rgba(255, 255, 255, 0.04);
+  scrollbar-color: rgba(156, 20, 20, 0.62) transparent;
 }
 
 .vehicle-controls-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .vehicle-controls-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
+  background: transparent;
 }
 
 .vehicle-controls-scroll::-webkit-scrollbar-thumb {
-  background: rgba(156, 20, 20, 0.55);
+  background: rgba(156, 20, 20, 0.62);
   border-radius: 999px;
 }
 
 .vehicle-controls-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 20, 20, 0.8);
+  background: rgba(156, 20, 20, 0.86);
 }
