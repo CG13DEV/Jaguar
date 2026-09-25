@@ -41,8 +41,8 @@ function LabSlider({
   return (
     <label className="block font-sans">
       <div className="mb-[0.3vh] flex items-center justify-between">
-        <span className="text-[0.82vh] uppercase tracking-[0.16em] text-white/24">{label}</span>
-        <span className="font-mono text-[0.86vh] text-white/36">{value}</span>
+        <span className="text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.16em] text-white/24">{label}</span>
+        <span className="font-mono text-[0.86vh] max-md:text-[10px] text-white/36">{value}</span>
       </div>
       <input
         type="range"
@@ -429,7 +429,7 @@ export function CharacterInterfacePrototype({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
+      className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none max-md:overflow-y-auto max-md:overscroll-contain"
     >
       <div className={embedded ? 'hidden' : 'absolute left-[8vw] top-[5vh]'}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
@@ -437,10 +437,10 @@ export function CharacterInterfacePrototype({
         </h1>
       </div>
 
-      <div className="absolute inset-x-0 top-[17vh] flex justify-center">
+      <div className="absolute inset-x-0 top-[17vh] flex justify-center max-md:relative max-md:inset-auto max-md:top-auto max-md:mt-[118px] max-md:px-3">
         <div
           id="hud-preview-viewport"
-          className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+          className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)] max-md:!w-full"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
           onMouseDown={(event) => {
             if (event.button === 0) action();
@@ -463,8 +463,8 @@ export function CharacterInterfacePrototype({
         </div>
       </div>
 
-      <div className="absolute right-[8vw] top-[25vh] z-20 w-[5.4vw]">
-        <div className="mb-[0.9vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
+      <div className="absolute right-[8vw] top-[25vh] z-20 w-[5.4vw] max-md:relative max-md:right-auto max-md:top-auto max-md:z-20 max-md:mx-3 max-md:mt-5 max-md:w-auto max-md:pb-[96px]">
+        <div className="mb-[0.9vh] font-sans text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.2em] text-white/16">
           {lang === 'ru' ? 'состояние' : 'state'}
         </div>
 
@@ -482,7 +482,7 @@ export function CharacterInterfacePrototype({
               <span className={`shrink-0 font-mono text-[0.78vh] ${item.id === mode ? 'text-[#9c1414]/85' : 'text-[#383838]'}`}>
                 {index + 1}
               </span>
-              <span className="text-[0.98vh] uppercase leading-[1.05] tracking-[0.04em]">
+              <span className="text-[0.98vh] uppercase leading-[1.05] tracking-[0.04em] max-md:text-[11px]">
                 {lang === 'ru' ? item.ru : item.en}
               </span>
             </button>
@@ -494,7 +494,7 @@ export function CharacterInterfacePrototype({
           <LabSlider label="ST" value={stamina} onChange={setStamina} />
         </div>
 
-        <div className="mt-[1.2vh] whitespace-pre-line font-mono text-[0.72vh] leading-[1.55] tracking-[0.03em] text-[#343434]">
+        <div className="mt-[1.2vh] whitespace-pre-line font-mono text-[0.72vh] leading-[1.55] tracking-[0.03em] text-[#343434] max-md:text-[9px]">
           {lang === 'ru' ? 'SPACE / ЛКМ — действие\nR — перезарядка' : 'SPACE / LMB — action\nR — reload'}
         </div>
       </div>
