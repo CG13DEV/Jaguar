@@ -168,7 +168,6 @@ export function InventoryInterfacePrototype({
       : 'min(72vw, calc(67vh * 16 / 9))';
 
   const slotSize = viewportRatio === '32:9' ? '4.24cqw' : viewportRatio === '21:9' ? '4.8cqw' : '5.44cqw';
-  const gridGapPx = 5;
   const gridWidth = viewportRatio === '32:9'
     ? 'calc(16.96cqw + 15px)'
     : viewportRatio === '21:9'
