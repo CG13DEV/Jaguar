@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { Maximize2 } from 'lucide-react';
 import { Language } from './App';
 import { CharacterInterfacePrototype } from './CharacterInterfacePrototype';
 import { VehicleInterfacePrototype } from './VehicleInterfacePrototype';
@@ -25,6 +26,7 @@ const SWIPE_THRESHOLD_PX = 48;
 export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
   const [sectionIndex, setSectionIndex] = useState(0);
   const [viewportRatio, setViewportRatio] = useState<ViewportRatio>('16:9');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const activeSection = SECTIONS[sectionIndex];
@@ -38,8 +40,33 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
   }, []);
 
   useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    const viewport = document.getElementById('hud-preview-viewport');
+    if (viewport?.requestFullscreen) {
+      await viewport.requestFullscreen();
+    }
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+          return;
+        }
         onBack();
         return;
       }
@@ -153,7 +180,8 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
         })}
       </div>
 
-      <div className="absolute bottom-[6vh] left-[8vw] z-40 flex items-center font-oswald text-[2vh] tracking-widest">
+      <div className="absolute bottom-[6vh] left-[8vw] z-40 flex items-center gap-[1.2vw]">
+        <div className="flex items-center font-oswald text-[2vh] tracking-widest">
         {RATIOS.map((ratio, index) => (
           <span key={ratio} className="flex items-center">
             <button
@@ -167,6 +195,16 @@ export function InterfacesScreen({ onBack, lang }: InterfacesScreenProps) {
             {index < RATIOS.length - 1 && <span className="mx-[0.65vw] text-[#333]">|</span>}
           </span>
         ))}
+        </div>
+
+        <button
+          onClick={toggleFullscreen}
+          className={`flex items-center gap-[0.45vw] font-oswald text-[1.4vh] uppercase tracking-[0.14em] transition-colors ${isFullscreen ? 'text-[#9c1414]' : 'text-[#555] hover:text-[#c0c0c0]'}`}
+          title={lang === 'ru' ? 'Полноэкранный режим' : 'Fullscreen preview'}
+        >
+          <Maximize2 className="h-[1.6vh] w-[1.6vh]" strokeWidth={1.4} />
+          {lang === 'ru' ? 'Экран' : 'Full'}
+        </button>
       </div>
 
       <div className="absolute bottom-[6vh] right-[8vw] z-40">
