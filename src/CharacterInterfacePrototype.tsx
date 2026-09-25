@@ -162,43 +162,31 @@ function ResourceLines({ health, stamina }: { health: number; stamina: number })
   const showHealth = health < 98;
   const showStamina = stamina < 98;
 
-  if (!showHealth && !showStamina) return null;
-
   return (
-    <div className="absolute bottom-[6.3%] left-[4.8%] flex w-[54px] flex-col gap-[4px]">
-      <AnimatePresence>
-        {showHealth && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: health < 30 ? 0.9 : 0.5 }}
-            exit={{ opacity: 0 }}
-            className="h-px w-full bg-white/8"
-          >
-            <motion.div
-              animate={{ width: `${health}%` }}
-              transition={{ duration: 0.15 }}
-              className="h-full bg-[#9c1414]"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="absolute right-[4.8%] top-[5.8%] grid w-[58px] grid-rows-[1px_1px] gap-[5px]">
+      <motion.div
+        animate={{ opacity: showHealth ? (health < 30 ? 0.9 : 0.5) : 0 }}
+        transition={{ duration: 0.14 }}
+        className="h-px w-full bg-white/8"
+      >
+        <motion.div
+          animate={{ width: `${health}%` }}
+          transition={{ duration: 0.15 }}
+          className="h-full bg-[#9c1414]"
+        />
+      </motion.div>
 
-      <AnimatePresence>
-        {showStamina && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: stamina < 25 ? 0.65 : 0.3 }}
-            exit={{ opacity: 0 }}
-            className="h-px w-full bg-white/7"
-          >
-            <motion.div
-              animate={{ width: `${stamina}%` }}
-              transition={{ duration: 0.15 }}
-              className="h-full bg-white/70"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.div
+        animate={{ opacity: showStamina ? (stamina < 25 ? 0.65 : 0.3) : 0 }}
+        transition={{ duration: 0.14 }}
+        className="h-px w-full bg-white/7"
+      >
+        <motion.div
+          animate={{ width: `${stamina}%` }}
+          transition={{ duration: 0.15 }}
+          className="h-full bg-white/70"
+        />
+      </motion.div>
     </div>
   );
 }
@@ -213,7 +201,7 @@ function AmmoReadout({
   reloading: boolean;
 }) {
   return (
-    <div className="absolute bottom-[5.8%] right-[4.8%] flex items-baseline gap-[5px] font-mono">
+    <div className="absolute right-[4.8%] top-1/2 flex -translate-y-1/2 items-baseline gap-[6px] font-mono">
       <AnimatePresence mode="wait">
         <motion.span
           key={`${ammo}-${reloading}`}
@@ -221,13 +209,13 @@ function AmmoReadout({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 2 }}
           transition={{ duration: 0.1 }}
-          className={`text-[13px] leading-none ${ammo === 0 ? 'text-[#9c1414]/85' : 'text-white/64'}`}
+          className={`text-[20px] leading-none ${ammo === 0 ? 'text-[#9c1414]/85' : 'text-white/68'}`}
         >
           {reloading ? '–' : ammo}
         </motion.span>
       </AnimatePresence>
-      <span className="text-[8px] text-white/18">·</span>
-      <span className="text-[8px] text-white/22">{reserve}</span>
+      <span className="text-[10px] text-white/16">·</span>
+      <span className="text-[11px] text-white/26">{reserve}</span>
     </div>
   );
 }
