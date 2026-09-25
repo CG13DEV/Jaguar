@@ -31,8 +31,8 @@ function LabSlider({
   return (
     <label className="block font-sans">
       <div className="mb-[0.3vh] flex items-center justify-between">
-        <span className="text-[0.82vh] uppercase tracking-[0.16em] text-white/24">{label}</span>
-        <span className="font-mono text-[0.86vh] text-white/36">{value}{suffix}</span>
+        <span className="text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.16em] text-white/24">{label}</span>
+        <span className="font-mono text-[0.86vh] max-md:text-[10px] text-white/36">{value}{suffix}</span>
       </div>
       <input
         type="range"
@@ -290,7 +290,7 @@ export function VehicleInterfacePrototype({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none"
+      className="absolute inset-0 overflow-hidden bg-[#0d0d0d] font-oswald select-none max-md:overflow-y-auto max-md:overscroll-contain"
     >
       <div className={embedded ? 'hidden' : 'absolute left-[8vw] top-[5vh]'}>
         <h1 className="text-[7vh] font-light uppercase leading-none tracking-tight text-[#c0c0c0]">
@@ -298,10 +298,10 @@ export function VehicleInterfacePrototype({
         </h1>
       </div>
 
-      <div className="absolute inset-x-0 top-[17vh] flex justify-center">
+      <div className="absolute inset-x-0 top-[17vh] flex justify-center max-md:relative max-md:inset-auto max-md:top-auto max-md:mt-[118px] max-md:px-3">
         <div
           id="hud-preview-viewport"
-          className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+          className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)] max-md:!w-full"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
           <div className="absolute bottom-[6.2%] left-[5.2%]">
@@ -346,14 +346,14 @@ export function VehicleInterfacePrototype({
         </div>
       </div>
 
-      <div className="vehicle-controls-scroll absolute bottom-[17vh] right-[3.5vw] top-[21vh] z-20 w-[8vw] min-w-[132px] overflow-y-auto pr-[18px]">
-        <div className="mb-[1vh] font-sans text-[0.82vh] uppercase tracking-[0.2em] text-white/16">
+      <div className="vehicle-controls-scroll absolute bottom-[17vh] right-[3.5vw] top-[21vh] z-20 w-[8vw] min-w-[132px] overflow-y-auto pr-[18px] max-md:relative max-md:inset-auto max-md:mx-3 max-md:mt-5 max-md:w-auto max-md:min-w-0 max-md:overflow-visible max-md:pr-0 max-md:pb-[96px]">
+        <div className="mb-[1vh] font-sans text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.2em] text-white/16">
           {lang === 'ru' ? 'параметры' : 'parameters'}
         </div>
 
         <div className="flex flex-col gap-[1.05vh]">
           <label className="flex cursor-pointer items-center justify-between gap-[8px] font-sans">
-            <span className="text-[0.82vh] uppercase tracking-[0.14em] text-white/24">
+            <span className="text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.14em] text-white/24">
               {lang === 'ru' ? 'Показывать ввод' : 'Show inputs'}
             </span>
             <input
@@ -372,17 +372,17 @@ export function VehicleInterfacePrototype({
 
           <div>
             <div className="mb-[0.35vh] flex items-center justify-between font-sans">
-              <span className="text-[0.82vh] uppercase tracking-[0.16em] text-white/24">
+              <span className="text-[0.82vh] max-md:text-[10px] uppercase tracking-[0.16em] text-white/24">
                 {lang === 'ru' ? 'Передача' : 'Gear'}
               </span>
-              <span className="font-mono text-[0.86vh] text-white/36">{gear}</span>
+              <span className="font-mono text-[0.86vh] max-md:text-[10px] text-white/36">{gear}</span>
             </div>
             <div className="grid grid-cols-4 gap-[6px]">
               {GEARS.map((item, index) => (
                 <button
                   key={item}
                   onClick={() => setGearIndex(index)}
-                  className={`border py-[0.28vh] font-mono text-[0.78vh] transition-colors ${
+                  className={`border py-[0.28vh] font-mono text-[0.78vh] max-md:text-[10px] transition-colors ${
                     gearIndex === index
                       ? 'border-[#9c1414]/55 bg-[#9c1414]/8 text-[#bdbdbd]'
                       : 'border-white/8 text-[#444] hover:border-white/16 hover:text-[#888]'
