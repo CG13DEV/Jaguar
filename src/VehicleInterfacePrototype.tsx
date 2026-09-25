@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown } from 'lucide-react';
 import { Language } from './App';
 
 interface VehicleInterfacePrototypeProps {
@@ -10,7 +9,6 @@ interface VehicleInterfacePrototypeProps {
   viewportRatio?: '16:9' | '21:9' | '32:9';
 }
 
-type RadarMode = 'map' | 'cars' | 'direction';
 
 const GEARS = ['R', 'N', '1', '2', '3', '4', '5', '6'];
 
@@ -90,103 +88,62 @@ function SteeringMeter({ value }: { value: number }) {
   );
 }
 
-function cardinalFromHeading(heading: number) {
-  const points = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  return points[Math.round(heading / 45) % 8];
-}
-
-function ArrowHead({
-  angle,
-  radius,
-  className,
-  size = 7,
+function MapRadar({
+  heading,
+  targetDirection,
+  timer,
 }: {
-  angle: number;
-  radius: number;
-  className: string;
-  size?: number;
+  heading: number;
+  targetDirection: number;
+  timer: number;
 }) {
-  const radians = ((angle - 90) * Math.PI) / 180;
-  const x = Math.cos(radians) * radius;
-  const y = Math.sin(radians) * radius;
+  const relativeTarget = targetDirection - heading;
 
   return (
-    <motion.i
-      animate={{ x, y, rotate: angle }}
-      transition={{ duration: 0.16, ease: 'easeOut' }}
-      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${className}`}
-      style={{
-        width: 0,
-        height: 0,
-        borderLeft: `${size / 2}px solid transparent`,
-        borderRight: `${size / 2}px solid transparent`,
-        borderBottom: `${size}px solid currentColor`,
-      }}
-    />
-  );
-}
-
-function DirectionRadar({ heading }: { heading: number }) {
-  const targetAngle = 72;
-  const pursuers = [214, 304];
-
-  return (
-    <div className="relative h-[116px] w-[116px]">
-      <div className="absolute left-1/2 top-1/2 h-[3px] w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/42" />
-
-      <ArrowHead angle={0} radius={42} size={6} className="text-white/28" />
-      <span className="absolute left-1/2 top-[5px] -translate-x-1/2 font-mono text-[8px] tracking-[0.12em] text-white/28">N</span>
-
-      <ArrowHead angle={targetAngle - heading} radius={34} size={9} className="text-[#9c1414]/82" />
-
-      {pursuers.map((angle, index) => (
-        <ArrowHead
-          key={angle}
-          angle={angle - heading}
-          radius={index === 0 ? 43 : 48}
-          size={7}
-          className="text-white/38"
-        />
-      ))}
-
-      <motion.div
-        animate={{ rotate: heading }}
-        transition={{ duration: 0.16, ease: 'easeOut' }}
-        className="absolute left-1/2 top-1/2 h-[16px] w-[12px] -translate-x-1/2 -translate-y-1/2"
+    <div className="relative h-[132px] w-[132px]">
+      <svg
+        viewBox="0 0 132 132"
+        className="pointer-events-none absolute inset-0 h-full w-full -rotate-90"
+        aria-hidden="true"
       >
-        <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[3.5px] border-b-[9px] border-x-transparent border-b-white/64" />
-      </motion.div>
+        <circle
+          cx="66"
+          cy="66"
+          r="62"
+          fill="none"
+          stroke="rgba(255,255,255,0.055)"
+          strokeWidth="1"
+        />
+        <motion.circle
+          cx="66"
+          cy="66"
+          r="62"
+          fill="none"
+          stroke="rgba(156,20,20,0.72)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          pathLength="100"
+          strokeDasharray="100"
+          animate={{ strokeDashoffset: 100 - timer }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        />
+      </svg>
 
-      <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[7px] tracking-[0.1em] text-white/22">
-        {cardinalFromHeading(heading)}
-      </div>
-    </div>
-  );
-}
-
-function MapRadar({ heading, showCars }: { heading: number; showCars: boolean }) {
-  return (
-    <div className="relative h-[116px] w-[116px]">
-      <div className="absolute inset-0 overflow-hidden rounded-full border border-white/12 bg-black/10">
+      <div className="absolute left-1/2 top-1/2 h-[116px] w-[116px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full border border-white/12 bg-black/10">
         <motion.div
           animate={{ rotate: -heading }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
           className="absolute left-1/2 top-1/2 h-[150px] w-[150px] -translate-x-1/2 -translate-y-1/2"
         >
-          {/* Road network only; no FOV / sight-sector lines. */}
           <i className="absolute left-[68px] top-[-22px] h-[194px] w-[2px] rotate-[18deg] bg-white/10" />
           <i className="absolute left-[-20px] top-[72px] h-[2px] w-[190px] -rotate-[12deg] bg-white/8" />
           <i className="absolute left-[31px] top-[19px] h-[108px] w-[2px] -rotate-[42deg] bg-white/7" />
           <i className="absolute left-[92px] top-[48px] h-[2px] w-[58px] rotate-[28deg] bg-white/7" />
           <i className="absolute left-[13px] top-[109px] h-[2px] w-[74px] rotate-[11deg] bg-white/6" />
 
-          {showCars && (
-            <>
-              <i className="absolute left-[95px] top-[40px] h-[5px] w-[3px] rotate-[28deg] bg-white/42" />
-              <i className="absolute left-[35px] top-[104px] h-[5px] w-[3px] -rotate-[18deg] bg-[#9c1414]/64" />
-              <i className="absolute left-[112px] top-[93px] h-[5px] w-[3px] rotate-[71deg] bg-white/28" />
-            </>
-          )}
+          <i className="absolute left-[95px] top-[40px] h-[5px] w-[3px] rotate-[28deg] bg-white/42" />
+          <i className="absolute left-[35px] top-[104px] h-[5px] w-[3px] -rotate-[18deg] bg-[#9c1414]/64" />
+          <i className="absolute left-[112px] top-[93px] h-[5px] w-[3px] rotate-[71deg] bg-white/28" />
         </motion.div>
 
         <div className="absolute left-1/2 top-1/2 h-[12px] w-[9px] -translate-x-1/2 -translate-y-1/2">
@@ -194,23 +151,15 @@ function MapRadar({ heading, showCars }: { heading: number; showCars: boolean })
         </div>
       </div>
 
-      <div className="absolute -top-[18px] left-1/2 flex -translate-x-1/2 items-center gap-[6px]">
-        <motion.div
-          animate={{ rotate: heading }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="relative h-[10px] w-[10px]"
-        >
-          <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[2.5px] border-b-[7px] border-x-transparent border-b-white/42" />
-        </motion.div>
-        <span className="font-mono text-[8px] tracking-[0.1em] text-white/28">{cardinalFromHeading(heading)}</span>
-      </div>
+      <motion.div
+        animate={{ rotate: relativeTarget }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+        className="absolute left-1/2 top-[-7px] h-[13px] w-[13px] -translate-x-1/2"
+      >
+        <i className="absolute left-1/2 top-0 h-0 w-0 -translate-x-1/2 border-x-[3px] border-b-[9px] border-x-transparent border-b-[#9c1414]/82" />
+      </motion.div>
     </div>
   );
-}
-
-function Radar({ heading, mode }: { heading: number; mode: RadarMode }) {
-  if (mode === 'direction') return <DirectionRadar heading={heading} />;
-  return <MapRadar heading={heading} showCars={mode === 'cars'} />;
 }
 
 function PrimaryReadout({
@@ -238,12 +187,12 @@ function PrimaryReadout({
 
       <div className="flex h-full w-max flex-col items-end justify-center">
         <div className="relative w-max whitespace-nowrap font-mono">
-          <div aria-hidden="true" className="invisible flex items-baseline gap-[2px]">
+          <div aria-hidden="true" className="invisible flex items-baseline gap-[6px]">
             <span className="text-[21px] font-light leading-none">220</span>
             <span className="text-[6px] uppercase tracking-[0.06em]">km/h</span>
           </div>
 
-          <div className="absolute inset-0 flex items-baseline justify-end gap-[2px]">
+          <div className="absolute inset-0 flex items-baseline justify-end gap-[6px]">
             <span className="text-[21px] font-light leading-none text-white/60">{speed}</span>
             <span className="text-[6px] uppercase tracking-[0.06em] text-white/16">km/h</span>
           </div>
@@ -286,7 +235,8 @@ export function VehicleInterfacePrototype({
   const [heading, setHeading] = useState(38);
   const [gearIndex, setGearIndex] = useState(4);
   const [showInputs, setShowInputs] = useState(true);
-  const [radarMode, setRadarMode] = useState<RadarMode>('map');
+  const [targetDirection, setTargetDirection] = useState(72);
+  const [timer, setTimer] = useState(68);
 
   const viewportAspect = viewportRatio === '32:9' ? '32 / 9' : viewportRatio === '21:9' ? '21 / 9' : '16 / 9';
   const viewportWidth = viewportRatio === '32:9'
@@ -317,7 +267,7 @@ export function VehicleInterfacePrototype({
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
           <div className="absolute bottom-[6.2%] left-[5.2%]">
-            <Radar heading={heading} mode={radarMode} />
+            <MapRadar heading={heading} targetDirection={targetDirection} timer={timer} />
           </div>
 
           <div className="absolute bottom-[5.7%] right-[4.8%]">
@@ -341,8 +291,8 @@ export function VehicleInterfacePrototype({
                 )}
               </AnimatePresence>
 
-              <div className="col-start-1 row-start-2 w-full self-end">
-                <div className="grid w-full gap-y-[4px]">
+              <div className="col-start-1 row-start-2 h-[48px] w-full self-end">
+                <div className="grid h-full w-full grid-rows-4 content-between">
                   <Meter label="CAR" value={carDamage} tone="danger" />
                   <Meter label="DRV" value={driverDamage} tone="danger" />
                   <Meter label="LOAD" value={cargoDamage} tone="danger" />
@@ -376,23 +326,6 @@ export function VehicleInterfacePrototype({
             />
           </label>
 
-          <label className="block font-sans">
-            <span className="mb-[0.4vh] block text-[0.82vh] uppercase tracking-[0.14em] text-white/24">
-              {lang === 'ru' ? 'Радар' : 'Radar'}
-            </span>
-            <div className="relative">
-              <select
-                value={radarMode}
-                onChange={(event) => setRadarMode(event.target.value as RadarMode)}
-                className="w-full appearance-none border border-white/10 bg-[#111] px-[7px] py-[5px] pr-[22px] font-sans text-[0.86vh] uppercase tracking-[0.08em] text-white/48 outline-none transition-colors hover:border-white/18 focus:border-[#9c1414]/45"
-              >
-                <option value="map">{lang === 'ru' ? 'Карта' : 'Map'}</option>
-                <option value="cars">{lang === 'ru' ? 'Машины' : 'Cars'}</option>
-                <option value="direction">{lang === 'ru' ? 'Направления' : 'Directions'}</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-[6px] top-1/2 h-[10px] w-[10px] -translate-y-1/2 text-white/26" strokeWidth={1.4} />
-            </div>
-          </label>
 
           <div className="my-[0.15vh] h-px bg-white/6" />
 
@@ -406,7 +339,7 @@ export function VehicleInterfacePrototype({
               </span>
               <span className="font-mono text-[0.86vh] text-white/36">{gear}</span>
             </div>
-            <div className="grid grid-cols-4 gap-[2px]">
+            <div className="grid grid-cols-4 gap-[6px]">
               {GEARS.map((item, index) => (
                 <button
                   key={item}
@@ -437,6 +370,8 @@ export function VehicleInterfacePrototype({
           <LabSlider label={lang === 'ru' ? 'Груз' : 'Cargo dmg'} value={cargoDamage} onChange={setCargoDamage} suffix="%" />
           <LabSlider label={lang === 'ru' ? 'Топливо' : 'Fuel'} value={fuel} onChange={setFuel} suffix="%" />
           <LabSlider label={lang === 'ru' ? 'Курс' : 'Heading'} value={heading} onChange={setHeading} suffix="°" max={359} />
+          <LabSlider label={lang === 'ru' ? 'Цель' : 'Target'} value={targetDirection} onChange={setTargetDirection} suffix="°" max={359} />
+          <LabSlider label={lang === 'ru' ? 'Таймер' : 'Timer'} value={timer} onChange={setTimer} suffix="%" />
         </div>
       </div>
 
