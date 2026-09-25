@@ -167,7 +167,9 @@ export function InventoryInterfacePrototype({
       ? 'min(72vw, calc(67vh * 21 / 9))'
       : 'min(72vw, calc(67vh * 16 / 9))';
 
-  const slotSize = viewportRatio === '32:9' ? '5.3cqw' : viewportRatio === '21:9' ? '6cqw' : '6.8cqw';
+  const slotSize = viewportRatio === '32:9' ? '4.24cqw' : viewportRatio === '21:9' ? '4.8cqw' : '5.44cqw';
+  const trunkRows = viewportRatio === '32:9' ? 4 : viewportRatio === '21:9' ? 6 : 7;
+  const trunkSlotCount = trunkRows * 4;
 
   return (
     <motion.div
@@ -232,7 +234,7 @@ export function InventoryInterfacePrototype({
                         <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-white/22">
                           {lang === 'ru' ? 'багажник' : 'trunk'}
                         </span>
-                        <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">04 / 20</span>
+                        <span className="font-mono text-[8px] tracking-[0.16em] text-white/16">{`04 / ${trunkSlotCount}`}</span>
                       </div>
 
                       <div
@@ -251,7 +253,7 @@ export function InventoryInterfacePrototype({
                           </div>
                         ))}
 
-                        {Array.from({ length: 12 }, (_, index) => (
+                        {Array.from({ length: Math.max(0, trunkSlotCount - 4) }, (_, index) => (
                           <div
                             key={`trunk-empty-${index}`}
                             className="h-full w-full border border-white/8 bg-white/[0.006]"
@@ -341,7 +343,7 @@ export function InventoryInterfacePrototype({
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
-                      className="mt-[34px]"
+                      className="mt-[48px]"
                     >
                       <div>
                         <div className="text-[16px] font-light text-white/72">{lang === 'ru' ? activeItem.ru : activeItem.en}</div>
