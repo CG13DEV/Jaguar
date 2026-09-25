@@ -340,26 +340,28 @@ export function InventoryInterfacePrototype({
                     <div className="h-full w-full border border-white/8 bg-white/[0.006]" />
                   </div>
 
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeItem.id}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      className="mt-[48px] w-full"
-                    >
-                      <div>
-                        <div className="text-[16px] font-light text-white/72">{lang === 'ru' ? activeItem.ru : activeItem.en}</div>
-                        <div className="mt-[2px] font-sans text-[8px] uppercase tracking-[0.22em] text-white/22">
-                          {lang === 'ru' ? activeItem.typeRu : activeItem.typeEn}
-                        </div>
-                        <div className="mt-[8px] w-full font-sans text-[10px] leading-[1.5] text-white/32">
-                          {lang === 'ru' ? activeItem.descRu : activeItem.descEn}
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
                 </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeItem.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="absolute right-[5%] top-[64%]"
+                    style={{ width: gridWidth }}
+                  >
+                    <div className="text-[16px] font-light text-white/72">
+                      {lang === 'ru' ? activeItem.ru : activeItem.en}
+                    </div>
+                    <div className="mt-[2px] font-sans text-[8px] uppercase tracking-[0.22em] text-white/22">
+                      {lang === 'ru' ? activeItem.typeRu : activeItem.typeEn}
+                    </div>
+                    <div className="mt-[8px] w-full font-sans text-[10px] leading-[1.5] text-white/32">
+                      {lang === 'ru' ? activeItem.descRu : activeItem.descEn}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
 
                 <AnimatePresence>
                   {contextMenu !== null && (
