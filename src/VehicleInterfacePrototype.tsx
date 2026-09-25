@@ -184,45 +184,59 @@ export function VehicleInterfacePrototype({
             <Radar heading={heading} />
           </div>
 
-          <div className="absolute bottom-[5.7%] right-[4.8%] flex items-end gap-[15px]">
-            <div className="mb-[1px] grid grid-cols-2 gap-x-[10px] gap-y-[4px]">
-              <Meter label="GAS" value={throttle} />
-              <Meter label="CAR" value={carDamage} tone="danger" />
-              <Meter label="BRK" value={brake} />
-              <Meter label="DRV" value={driverDamage} tone="danger" />
-              <Meter label="CLT" value={clutch} />
-              <Meter label="LOAD" value={cargoDamage} tone="danger" />
-              <SteeringMeter value={steering} />
-              <Meter label="FUEL" value={fuel} />
-            </div>
-
-            <div className="mb-[1px] flex flex-col items-end">
-              <div className="flex items-baseline gap-[5px] font-mono">
-                <span className="text-[20px] font-light leading-none text-white/58">{speed}</span>
-                <span className="text-[7px] uppercase tracking-[0.16em] text-white/16">km/h</span>
+          <div className="absolute bottom-[5.7%] right-[4.8%]">
+            <div className="grid grid-cols-[80px_112px] grid-rows-[auto_auto] items-end gap-x-[15px] gap-y-[11px]">
+              {/* 3. Driver inputs — directly above the primary driving readout. */}
+              <div className="col-start-2 row-start-1 border-b border-white/6 pb-[8px]">
+                <div className="grid gap-y-[4px]">
+                  <Meter label="GAS" value={throttle} />
+                  <Meter label="BRK" value={brake} />
+                  <Meter label="CLT" value={clutch} />
+                  <SteeringMeter value={steering} />
+                </div>
               </div>
 
-              <div className="mt-[6px] flex items-center gap-[5px]">
-                <span className="font-mono text-[6px] uppercase tracking-[0.12em] text-white/16">rpm</span>
-                <div className="h-px w-[58px] bg-white/7">
+              {/* 2. Persistent condition / resource block — left of the primary readout. */}
+              <div className="col-start-1 row-start-2 self-end border-r border-white/6 pr-[10px]">
+                <div className="grid gap-y-[4px]">
+                  <Meter label="CAR" value={carDamage} tone="danger" />
+                  <Meter label="DRV" value={driverDamage} tone="danger" />
+                  <Meter label="LOAD" value={cargoDamage} tone="danger" />
+                  <Meter label="FUEL" value={fuel} />
+                </div>
+              </div>
+
+              {/* 1. Primary driving readout — fixed to the bottom-right corner. */}
+              <div className="col-start-2 row-start-2">
+                <div className="flex items-end justify-between gap-[10px]">
                   <motion.div
-                    animate={{ width: `${rpm}%` }}
+                    key={gear}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.12 }}
-                    className={`h-full ${rpmDanger ? 'bg-[#9c1414]/72' : 'bg-white/34'}`}
-                  />
+                    className="font-mono text-[38px] font-light leading-[0.76] text-white/76"
+                  >
+                    {gear}
+                  </motion.div>
+
+                  <div className="flex items-baseline gap-[4px] font-mono">
+                    <span className="text-[21px] font-light leading-none text-white/58">{speed}</span>
+                    <span className="text-[6px] uppercase tracking-[0.14em] text-white/16">km/h</span>
+                  </div>
+                </div>
+
+                <div className="mt-[7px] flex items-center gap-[5px]">
+                  <span className="font-mono text-[6px] uppercase tracking-[0.12em] text-white/16">rpm</span>
+                  <div className="h-px flex-1 bg-white/7">
+                    <motion.div
+                      animate={{ width: `${rpm}%` }}
+                      transition={{ duration: 0.12 }}
+                      className={`h-full ${rpmDanger ? 'bg-[#9c1414]/72' : 'bg-white/34'}`}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-
-            <motion.div
-              key={gear}
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.12 }}
-              className="font-mono text-[34px] font-light leading-[0.78] text-white/74"
-            >
-              {gear}
-            </motion.div>
           </div>
         </div>
       </div>
