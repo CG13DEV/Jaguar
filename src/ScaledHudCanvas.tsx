@@ -1,4 +1,5 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 export type HudViewportRatio = '16:9' | '21:9' | '32:9';
 
