@@ -225,24 +225,24 @@ function PrimaryReadout({
   const rpmDanger = rpm >= 84;
 
   return (
-    <div className="grid h-[48px] w-[126px] grid-cols-[38px_78px] items-center gap-[10px]">
+    <div className="flex h-[48px] w-[128px] items-center justify-end">
       <motion.div
         key={gear}
         initial={{ opacity: 0, y: -3 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.1 }}
-        className="flex h-full items-center justify-start font-mono text-[39px] font-light leading-none text-white/76"
+        className="mr-[8px] flex h-full shrink-0 items-center justify-center font-mono text-[39px] font-light leading-none text-white/76"
       >
         {gear}
       </motion.div>
 
-      <div className="flex h-full w-[78px] flex-col justify-center">
-        <div className="flex w-full items-baseline justify-start gap-[3px] font-mono">
+      <div className="flex h-full w-[68px] shrink-0 flex-col items-end justify-center">
+        <div className="flex w-[68px] items-baseline justify-end gap-[2px] whitespace-nowrap font-mono">
           <span className="text-[21px] font-light leading-none text-white/60">{speed}</span>
-          <span className="text-[6px] uppercase tracking-[0.08em] text-white/16">km/h</span>
+          <span className="text-[6px] uppercase tracking-[0.06em] text-white/16">km/h</span>
         </div>
 
-        <div className="mt-[6px] w-[78px]">
+        <div className="mt-[6px] w-[68px]">
           <div className="mb-[3px] flex w-full items-center justify-between font-mono text-[6px] uppercase tracking-[0.1em] text-white/16">
             <span>rpm</span>
             <span>{rpm}</span>
