@@ -87,7 +87,7 @@ function Reticle({
           cy="32"
           fill="none"
           stroke="rgba(255,255,255,0.72)"
-          strokeWidth="1"
+          strokeWidth="0.6"
           vectorEffect="non-scaling-stroke"
           animate={{
             r: Math.max(1, visualRadius),
