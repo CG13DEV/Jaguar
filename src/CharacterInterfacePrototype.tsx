@@ -72,8 +72,8 @@ function Reticle({ mode, pulse }: { mode: Mode; pulse: number }) {
   }
 
   if (mode === 'shotgun') {
-    const baseGap = 15;
-    const kickGap = 28;
+    const baseGap = 45;
+    const kickGap = 68;
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[42px] w-[76px] -translate-x-1/2 -translate-y-1/2">
@@ -340,6 +340,7 @@ export function CharacterInterfacePrototype({
 
       <div className="absolute inset-x-0 top-[17vh] flex justify-center">
         <div
+          id="hud-preview-viewport"
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
           onMouseDown={(event) => {
