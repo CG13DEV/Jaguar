@@ -168,7 +168,9 @@ export function InventoryInterfacePrototype({
       : 'min(72vw, calc(67vh * 16 / 9))';
 
   const slotSize = viewportRatio === '32:9' ? '4.24cqw' : viewportRatio === '21:9' ? '4.8cqw' : '5.44cqw';
-  const trunkRows = viewportRatio === '32:9' ? 4 : viewportRatio === '21:9' ? 6 : 7;
+  const gridGapPx = 5;
+  const gridWidth = `calc(${slotSize} * 4 + ${gridGapPx * 3}px)`;
+  const trunkRows = viewportRatio === '32:9' ? 3 : viewportRatio === '21:9' ? 5 : 6;
   const trunkSlotCount = trunkRows * 4;
 
   return (
@@ -228,7 +230,8 @@ export function InventoryInterfacePrototype({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -12 }}
                       transition={{ duration: 0.18 }}
-                      className="absolute bottom-[8%] left-[5%] top-[18%] w-[31%]"
+                      className="absolute left-[5%] top-[18%]"
+                      style={{ width: gridWidth }}
                     >
                       <div className="mb-[7px] flex items-baseline justify-between">
                         <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-white/22">
@@ -282,7 +285,7 @@ export function InventoryInterfacePrototype({
                 </div>
 
                 {/* Personal inventory — exactly 4 × 2 square cells. */}
-                <div className="absolute right-[5%] top-[18%] w-max">
+                <div className="absolute right-[5%] top-[18%]" style={{ width: gridWidth }}>
                   <div className="mb-[7px] flex items-baseline justify-between">
                     <span className="font-sans text-[9px] uppercase tracking-[0.24em] text-white/22">
                       {lang === 'ru' ? 'инвентарь' : 'inventory'}
@@ -343,14 +346,14 @@ export function InventoryInterfacePrototype({
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
-                      className="mt-[48px]"
+                      className="mt-[48px] w-full"
                     >
                       <div>
                         <div className="text-[16px] font-light text-white/72">{lang === 'ru' ? activeItem.ru : activeItem.en}</div>
                         <div className="mt-[2px] font-sans text-[8px] uppercase tracking-[0.22em] text-white/22">
                           {lang === 'ru' ? activeItem.typeRu : activeItem.typeEn}
                         </div>
-                        <div className="mt-[8px] max-w-[92%] font-sans text-[10px] leading-[1.5] text-white/32">
+                        <div className="mt-[8px] w-full font-sans text-[10px] leading-[1.5] text-white/32">
                           {lang === 'ru' ? activeItem.descRu : activeItem.descEn}
                         </div>
                       </div>
