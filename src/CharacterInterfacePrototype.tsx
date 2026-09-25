@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
 import { getHashEnum, getHashNumber, replaceHashParams } from './routeState';
+import { ScaledHudCanvas } from './ScaledHudCanvas';
 
 type Mode = 'unarmed' | 'pistol' | 'shotgun' | 'automatic' | 'melee' | 'drugged';
 
@@ -446,20 +447,22 @@ export function CharacterInterfacePrototype({
             if (event.button === 0) action();
           }}
         >
-          <Reticle mode={mode} pulse={pulse} recoil={recoil} kick={reticleKick} />
-          <ResourceLines health={health} stamina={stamina} />
+          <ScaledHudCanvas ratio={viewportRatio}>
+            <Reticle mode={mode} pulse={pulse} recoil={recoil} kick={reticleKick} />
+            <ResourceLines health={health} stamina={stamina} />
 
-          {config.magazine && (
-            <AmmoReadout ammo={ammo} reserve={reserve} reloading={reloading} />
-          )}
+            {config.magazine && (
+              <AmmoReadout ammo={ammo} reserve={reserve} reloading={reloading} />
+            )}
 
-          {mode === 'drugged' && (
-            <motion.div
-              animate={{ opacity: [0, 0.025, 0.008, 0.018, 0] }}
-              transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(156,20,20,0.35),transparent_48%)]"
-            />
-          )}
+            {mode === 'drugged' && (
+              <motion.div
+                animate={{ opacity: [0, 0.025, 0.008, 0.018, 0] }}
+                transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(156,20,20,0.35),transparent_48%)]"
+              />
+            )}
+          </ScaledHudCanvas>
         </div>
       </div>
 
