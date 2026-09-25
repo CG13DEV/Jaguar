@@ -163,6 +163,7 @@ export function InventoryInterfacePrototype({
 
       <div className="absolute inset-x-0 top-[17vh] flex justify-center">
         <div
+          id="hud-preview-viewport"
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
