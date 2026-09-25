@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
 import { getHashBoolean, getHashEnum, getHashNumber, replaceHashParams } from './routeState';
+import { ScaledHudCanvas } from './ScaledHudCanvas';
 
 interface VehicleInterfacePrototypeProps {
   onBack: () => void;
@@ -304,6 +305,7 @@ export function VehicleInterfacePrototype({
           className="relative overflow-hidden border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)] max-md:!w-full"
           style={{ width: viewportWidth, aspectRatio: viewportAspect }}
         >
+          <ScaledHudCanvas ratio={viewportRatio}>
           <div className="absolute bottom-[6.2%] left-[5.2%]">
             <MapRadar heading={heading} targetDirection={targetDirection} timer={timer} />
           </div>
@@ -344,6 +346,7 @@ export function VehicleInterfacePrototype({
             </div>
           </div>
         </div>
+          </ScaledHudCanvas>
       </div>
 
       <div className="vehicle-controls-scroll absolute bottom-[17vh] right-[3.5vw] top-[21vh] z-20 w-[8vw] min-w-[132px] overflow-y-auto pr-[18px] max-md:relative max-md:inset-auto max-md:mx-3 max-md:mt-5 max-md:w-auto max-md:min-w-0 max-md:overflow-visible max-md:pr-0 max-md:pb-[96px]">
