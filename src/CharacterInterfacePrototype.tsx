@@ -113,8 +113,8 @@ function Reticle({
 
   if (mode === 'automatic') {
     const baseGap = 8;
-    const sustainedMaxGap = 22;
-    const absoluteMaxGap = 25;
+    const sustainedMaxGap = 44;
+    const absoluteMaxGap = 47;
     const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
     const visualGap = Math.min(absoluteMaxGap, currentGap + (kick ? 3 : 0));
 
