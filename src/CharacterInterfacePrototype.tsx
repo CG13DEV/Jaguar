@@ -69,15 +69,34 @@ function Reticle({
 
   if (mode === 'pistol') {
     return (
-      <div className="absolute left-1/2 top-1/2 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2">
-        <motion.i
-          key={pulse}
-          initial={{ scale: pulse ? 3.4 : 1, opacity: pulse ? 0.34 : 0 }}
-          animate={{ scale: 1, opacity: 0 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[5px] w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/45"
-        />
-        <i className="absolute left-1/2 top-1/2 h-[2px] w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/72" />
+      <div className="absolute left-1/2 top-1/2 h-[20px] w-[20px] -translate-x-1/2 -translate-y-1/2">
+        {pulse === 0 ? (
+          <i className="absolute left-1/2 top-1/2 h-[2px] w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/72" />
+        ) : (
+          <motion.i
+            key={`pistol-shot-${pulse}`}
+            initial={{
+              width: 2,
+              height: 2,
+              backgroundColor: 'rgba(255,255,255,0.72)',
+            }}
+            animate={{
+              width: [2, 15, 2],
+              height: [2, 15, 2],
+              backgroundColor: [
+                'rgba(255,255,255,0.72)',
+                'rgba(255,255,255,0)',
+                'rgba(255,255,255,0.72)',
+              ],
+            }}
+            transition={{
+              duration: 0.28,
+              times: [0, 0.42, 1],
+              ease: 'easeOut',
+            }}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/55"
+          />
+        )}
       </div>
     );
   }
@@ -124,10 +143,10 @@ function Reticle({
 
   if (mode === 'automatic') {
     const baseGap = 8;
-    const sustainedMaxGap = 15;
-    const absoluteMaxGap = 18;
+    const sustainedMaxGap = 20;
+    const absoluteMaxGap = 25;
     const currentGap = baseGap + (sustainedMaxGap - baseGap) * recoil;
-    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 3));
+    const shotKick = Math.max(0, Math.min(absoluteMaxGap - currentGap, 5));
 
     return (
       <div className="absolute left-1/2 top-1/2 h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2">
@@ -325,7 +344,7 @@ export function CharacterInterfacePrototype({
 
       if (mode === 'automatic' || mode === 'shotgun') {
         lastShotAtRef.current = performance.now();
-        const recoilStep = mode === 'automatic' ? 0.2 : 0.42;
+        const recoilStep = mode === 'automatic' ? 0.3 : 0.42;
         setRecoil((value) => Math.min(1, value + recoilStep));
       }
     }
