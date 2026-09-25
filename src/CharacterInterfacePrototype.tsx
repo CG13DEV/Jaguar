@@ -70,17 +70,39 @@ function Reticle({
   if (mode === 'unarmed') return null;
 
   if (mode === 'pistol') {
+    const sustainedMaxRadius = 18;
+    const absoluteMaxRadius = 21;
+    const currentRadius = sustainedMaxRadius * recoil;
+    const visualRadius = Math.min(absoluteMaxRadius, currentRadius + (kick ? 3 : 0));
+    const ringVisible = visualRadius > 1;
+
     return (
-      <div className="absolute left-1/2 top-1/2 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2">
-        <motion.i
-          key={pulse}
-          initial={{ scale: pulse ? 3.4 : 1, opacity: pulse ? 0.34 : 0 }}
-          animate={{ scale: 1, opacity: 0 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="absolute left-1/2 top-1/2 h-[5px] w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/45"
+      <svg
+        viewBox="0 0 64 64"
+        className="absolute left-1/2 top-1/2 h-[64px] w-[64px] -translate-x-1/2 -translate-y-1/2 overflow-visible"
+        aria-hidden="true"
+      >
+        <motion.circle
+          cx="32"
+          cy="32"
+          fill="none"
+          stroke="rgba(255,255,255,0.72)"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+          animate={{
+            r: Math.max(1, visualRadius),
+            opacity: ringVisible ? (kick ? 0.82 : 0.62) : 0,
+          }}
+          transition={{ duration: 0.055, ease: 'easeOut' }}
         />
-        <i className="absolute left-1/2 top-1/2 h-[2px] w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/72" />
-      </div>
+        <circle
+          cx="32"
+          cy="32"
+          r="1"
+          fill="rgba(255,255,255,0.72)"
+          opacity={ringVisible ? 0 : 1}
+        />
+      </svg>
     );
   }
 
@@ -300,9 +322,9 @@ export function CharacterInterfacePrototype({
 
       setAmmo((value) => value - 1);
 
-      if (mode === 'automatic' || mode === 'shotgun') {
+      if (mode === 'pistol' || mode === 'automatic' || mode === 'shotgun') {
         lastShotAtRef.current = performance.now();
-        const recoilStep = mode === 'automatic' ? 0.2 : 0.42;
+        const recoilStep = mode === 'shotgun' ? 0.42 : 0.2;
         setRecoil((value) => Math.min(1, value + recoilStep));
 
         // Retrigger the local shot kick explicitly, even if the previous kick is still active.
@@ -315,7 +337,7 @@ export function CharacterInterfacePrototype({
           kickTimerRef.current = window.setTimeout(() => {
             setReticleKick(false);
             kickTimerRef.current = null;
-          }, mode === 'automatic' ? 72 : 95);
+          }, mode === 'shotgun' ? 95 : 72);
           kickFrameRef.current = null;
         });
       }
@@ -329,13 +351,13 @@ export function CharacterInterfacePrototype({
   }, [ammo, config.magazine, mode, reloading]);
 
   useEffect(() => {
-    if (mode !== 'automatic' && mode !== 'shotgun') {
+    if (mode !== 'pistol' && mode !== 'automatic' && mode !== 'shotgun') {
       setRecoil(0);
       return;
     }
 
-    const decayDelay = mode === 'automatic' ? 150 : 220;
-    const decayStep = mode === 'automatic' ? 0.035 : 0.045;
+    const decayDelay = mode === 'shotgun' ? 220 : 150;
+    const decayStep = mode === 'shotgun' ? 0.045 : 0.035;
 
     const timer = window.setInterval(() => {
       if (performance.now() - lastShotAtRef.current < decayDelay) return;
