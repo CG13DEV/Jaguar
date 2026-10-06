@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
 import { getHashEnum, getHashNumber, replaceHashParams } from './routeState';
 import { ScaledHudCanvas } from './ScaledHudCanvas';
+import { HudMeter } from './HudMeter';
 
 type Mode = 'unarmed' | 'pistol' | 'shotgun' | 'automatic' | 'melee' | 'drugged';
 
@@ -205,29 +206,19 @@ function ResourceLines({ health, stamina }: { health: number; stamina: number })
   const showStamina = stamina < 98;
 
   return (
-    <div className="absolute right-[4.8%] top-[5.8%] grid w-[58px] grid-rows-[1px_1px] gap-[5px]">
+    <div className="absolute right-[4.8%] top-[5.8%] grid gap-y-[4px]">
       <motion.div
         animate={{ opacity: showHealth ? (health < 30 ? 0.9 : 0.5) : 0 }}
         transition={{ duration: 0.14 }}
-        className="h-px w-full bg-white/8"
       >
-        <motion.div
-          animate={{ width: `${health}%` }}
-          transition={{ duration: 0.15 }}
-          className="h-full bg-[#9c1414]"
-        />
+        <HudMeter label="HP" value={health} tone="danger" />
       </motion.div>
 
       <motion.div
         animate={{ opacity: showStamina ? (stamina < 25 ? 0.65 : 0.3) : 0 }}
         transition={{ duration: 0.14 }}
-        className="h-px w-full bg-white/7"
       >
-        <motion.div
-          animate={{ width: `${stamina}%` }}
-          transition={{ duration: 0.15 }}
-          className="h-full bg-white/70"
-        />
+        <HudMeter label="ST" value={stamina} />
       </motion.div>
     </div>
   );
