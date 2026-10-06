@@ -208,14 +208,14 @@ function ResourceLines({ health, stamina }: { health: number; stamina: number })
   return (
     <div className="absolute right-[4.8%] top-[5.8%] grid gap-y-[4px]">
       <motion.div
-        animate={{ opacity: showHealth ? (health < 30 ? 0.9 : 0.5) : 0 }}
+        animate={{ opacity: showHealth ? 1 : 0 }}
         transition={{ duration: 0.14 }}
       >
         <HudMeter label="HP" value={health} tone="danger" />
       </motion.div>
 
       <motion.div
-        animate={{ opacity: showStamina ? (stamina < 25 ? 0.65 : 0.3) : 0 }}
+        animate={{ opacity: showStamina ? 1 : 0 }}
         transition={{ duration: 0.14 }}
       >
         <HudMeter label="ST" value={stamina} />
