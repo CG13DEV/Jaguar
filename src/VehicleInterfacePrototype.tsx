@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Language } from './App';
 import { getHashBoolean, getHashEnum, getHashNumber, replaceHashParams } from './routeState';
 import { ScaledHudCanvas } from './ScaledHudCanvas';
+import { HudMeter } from './HudMeter';
 
 interface VehicleInterfacePrototypeProps {
   onBack: () => void;
@@ -47,27 +48,6 @@ function LabSlider({
   );
 }
 
-function Meter({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="grid grid-cols-[30px_1fr] items-center gap-[5px] font-mono text-[7px]">
-      <span className="text-white/18">{label}</span>
-      <div className="h-px bg-white/7">
-        <motion.div
-          animate={{ width: `${Math.max(0, Math.min(100, value))}%` }}
-          transition={{ duration: 0.12 }}
-          className="h-full bg-white/34"
-        />
-      </div>
-    </div>
-  );
-}
-
 function VehicleResourceLines({
   carDamage,
   driverDamage,
@@ -79,27 +59,12 @@ function VehicleResourceLines({
   cargoDamage: number;
   fuel: number;
 }) {
-  const resources = [
-    { label: 'CAR', value: carDamage, tone: 'danger' },
-    { label: 'DRV', value: driverDamage, tone: 'danger' },
-    { label: 'LOAD', value: cargoDamage, tone: 'danger' },
-    { label: 'FUEL', value: fuel, tone: 'neutral' },
-  ] as const;
-
   return (
-    <div className="absolute right-[4.8%] top-[5.8%] grid w-[58px] grid-rows-[1px_1px_1px_1px] gap-[5px]">
-      {resources.map(({ label, value, tone }) => (
-        <div key={label} className="relative h-px w-full bg-white/8">
-          <span className="absolute right-[calc(100%+6px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[6px] leading-none text-white/28">
-            {label}
-          </span>
-          <motion.div
-            animate={{ width: `${Math.max(0, Math.min(100, value))}%` }}
-            transition={{ duration: 0.15 }}
-            className={`h-full ${tone === 'danger' ? 'bg-[#9c1414]/65' : 'bg-white/70'}`}
-          />
-        </div>
-      ))}
+    <div className="absolute right-[4.8%] top-[5.8%] grid gap-y-[4px]">
+      <HudMeter label="CAR" value={carDamage} tone="danger" />
+      <HudMeter label="DRV" value={driverDamage} tone="danger" />
+      <HudMeter label="LOAD" value={cargoDamage} tone="danger" />
+      <HudMeter label="FUEL" value={fuel} />
     </div>
   );
 }
@@ -366,9 +331,9 @@ export function VehicleInterfacePrototype({
                     className="w-full pb-[2px]"
                   >
                     <div className="grid w-full gap-y-[4px]">
-                      <Meter label="GAS" value={throttle} />
-                      <Meter label="BRK" value={brake} />
-                      <Meter label="CLT" value={clutch} />
+                      <HudMeter label="GAS" value={throttle} />
+                      <HudMeter label="BRK" value={brake} />
+                      <HudMeter label="CLT" value={clutch} />
                       <SteeringMeter value={steering} />
                     </div>
                   </motion.div>
