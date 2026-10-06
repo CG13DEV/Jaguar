@@ -50,11 +50,9 @@ function LabSlider({
 function Meter({
   label,
   value,
-  tone = 'neutral',
 }: {
   label: string;
   value: number;
-  tone?: 'neutral' | 'danger';
 }) {
   return (
     <div className="grid grid-cols-[30px_1fr] items-center gap-[5px] font-mono text-[7px]">
@@ -63,9 +61,45 @@ function Meter({
         <motion.div
           animate={{ width: `${Math.max(0, Math.min(100, value))}%` }}
           transition={{ duration: 0.12 }}
-          className={`h-full ${tone === 'danger' ? 'bg-[#9c1414]/65' : 'bg-white/34'}`}
+          className="h-full bg-white/34"
         />
       </div>
+    </div>
+  );
+}
+
+function VehicleResourceLines({
+  carDamage,
+  driverDamage,
+  cargoDamage,
+  fuel,
+}: {
+  carDamage: number;
+  driverDamage: number;
+  cargoDamage: number;
+  fuel: number;
+}) {
+  const resources = [
+    { label: 'CAR', value: carDamage, tone: 'danger' },
+    { label: 'DRV', value: driverDamage, tone: 'danger' },
+    { label: 'LOAD', value: cargoDamage, tone: 'danger' },
+    { label: 'FUEL', value: fuel, tone: 'neutral' },
+  ] as const;
+
+  return (
+    <div className="absolute right-[4.8%] top-[5.8%] grid w-[58px] grid-rows-[1px_1px_1px_1px] gap-[5px]">
+      {resources.map(({ label, value, tone }) => (
+        <div key={label} className="relative h-px w-full bg-white/8">
+          <span className="absolute right-[calc(100%+6px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[6px] leading-none text-white/28">
+            {label}
+          </span>
+          <motion.div
+            animate={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+            transition={{ duration: 0.15 }}
+            className={`h-full ${tone === 'danger' ? 'bg-[#9c1414]/65' : 'bg-white/70'}`}
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -310,8 +344,15 @@ export function VehicleInterfacePrototype({
             <MapRadar heading={heading} targetDirection={targetDirection} timer={timer} />
           </div>
 
+          <VehicleResourceLines
+            carDamage={carDamage}
+            driverDamage={driverDamage}
+            cargoDamage={cargoDamage}
+            fuel={fuel}
+          />
+
           <div className="absolute bottom-[5.7%] right-[4.8%]">
-            <div className="grid grid-cols-[82px_auto] grid-rows-[auto_auto] items-end gap-[12px]">
+            <div className="flex w-max flex-col items-end gap-[12px]">
               <AnimatePresence initial={false}>
                 {showInputs && (
                   <motion.div
@@ -319,7 +360,7 @@ export function VehicleInterfacePrototype({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
                     transition={{ duration: 0.15 }}
-                    className="col-start-2 row-start-1 w-full pb-[2px]"
+                    className="w-full pb-[2px]"
                   >
                     <div className="grid w-full gap-y-[4px]">
                       <Meter label="GAS" value={throttle} />
@@ -331,18 +372,7 @@ export function VehicleInterfacePrototype({
                 )}
               </AnimatePresence>
 
-              <div className="col-start-1 row-start-2 h-[48px] w-full self-end">
-                <div className="grid h-full w-full grid-rows-4 content-between">
-                  <Meter label="CAR" value={carDamage} tone="danger" />
-                  <Meter label="DRV" value={driverDamage} tone="danger" />
-                  <Meter label="LOAD" value={cargoDamage} tone="danger" />
-                  <Meter label="FUEL" value={fuel} />
-                </div>
-              </div>
-
-              <div className="col-start-2 row-start-2">
-                <PrimaryReadout speed={speed} rpm={rpm} gear={gear} />
-              </div>
+              <PrimaryReadout speed={speed} rpm={rpm} gear={gear} />
             </div>
           </div>
           </ScaledHudCanvas>
