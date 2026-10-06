@@ -9,6 +9,9 @@ class UCanvasPanelSlot;
 class UTextBlock;
 class UBorder;
 class UNativeWidgetHost;
+class UTexture2D;
+class UStaticMeshComponent;
+class AActor;
 class SJaguarHUDReticle;
 class SJaguarHUDRadar;
 
@@ -141,6 +144,18 @@ public:
     void SetVehicleHUD(const FJaguarHUDVehicleData& NewData);
 
     /** Call only after a *successful* firearm discharge; triggers a fresh kick at max spread too. */
+    /**
+     * Optional explicit map sources. Both nullptr restores automatic discovery.
+     * Automatic mode reuses AJaguarPlayerController::GetTimelineMapTexture()
+     * and the single actor tagged Jaguar.MapContext from the menu.
+     */
+    UFUNCTION(BlueprintCallable, Category="Jaguar|HUD|Radar")
+    void SetRadarMapSources(UTexture2D* Texture, UStaticMeshComponent* Calibration);
+
+    /** Call when the vehicle is not the PlayerController's possessed pawn. */
+    UFUNCTION(BlueprintCallable, Category="Jaguar|HUD|Radar")
+    void SetRadarTrackedActor(AActor* Actor);
+
     UFUNCTION(BlueprintCallable, Category="Jaguar|HUD")
     void NotifyWeaponFired();
 
@@ -165,6 +180,8 @@ private:
     void RefreshVehicleHUD();
     void UpdateMeter(const FJaguarHUDMeterView& Meter, float Percent);
     void RefreshPresentation();
+    void TryAutoBindRadarMap();
+    void RefreshRadarMap();
 
     UPROPERTY(Transient)
     TObjectPtr<UCanvasPanel> CharacterLayer = nullptr;
@@ -216,6 +233,20 @@ private:
     TWeakObjectPtr<UCanvasPanelSlot> SteeringMarkerSlot;
     TSharedPtr<SJaguarHUDReticle> ReticlePainter;
     TSharedPtr<SJaguarHUDRadar> RadarPainter;
+
+    /** Keeps the texture alive while the Slate brush points to it. */
+    UPROPERTY(Transient)
+    TObjectPtr<UTexture2D> RadarMapTexture = nullptr;
+
+    TWeakObjectPtr<UStaticMeshComponent> RadarMapCalibration;
+    TWeakObjectPtr<AActor> RadarTrackedActor;
+    bool bRadarMapExplicit = false;
+    float RadarAutoBindCooldown = 0.f;
+
+    /** World-space radius shown inside the circular radar, in Unreal centimetres. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Jaguar|HUD|Radar",
+        meta=(AllowPrivateAccess="true", ClampMin="1000.0", UIMin="2000.0", UIMax="50000.0"))
+    float RadarWorldRadiusCm = 14000.f;
 
     UPROPERTY(EditAnywhere, Category="Jaguar|HUD", meta=(AllowPrivateAccess="true"))
     EJaguarHUDPresentation Presentation = EJaguarHUDPresentation::Character;

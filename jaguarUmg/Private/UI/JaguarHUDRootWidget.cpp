@@ -1,6 +1,17 @@
 #include "UI/JaguarHUDRootWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Character/JaguarPlayerController.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/Texture2D.h"
+#include "Framework/Application/SlateApplication.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "Kismet/GameplayStatics.h"
+#include "Rendering/RenderingCommon.h"
+#include "Rendering/SlateRenderer.h"
+#include "Brushes/SlateBrush.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -205,8 +216,10 @@ private:
     bool bKick = false;
 };
 
-// Prototype radar. The full geographic map can later reuse the authored
-// calibration and SJaguarMapView concepts from JaguarMenuRootWidget.cpp.
+// The same georeferenced texture and Jaguar.MapContext calibration as the
+// pause menu, but drawn as a heading-up circular minimap using one Slate fan.
+// SJaguarMapView is private to JaguarMenuRootWidget.cpp, so the HUD shares
+// sources + world-to-UV convention, not that menu's interactive Slate widget.
 class SJaguarHUDRadar final : public SLeafWidget
 {
 public:
@@ -223,6 +236,28 @@ public:
         Invalidate(EInvalidateWidgetReason::Paint);
     }
 
+    void SetMapState(UTexture2D* InTexture, UStaticMeshComponent* InCalibration,
+        const FVector& InWorldLocation, const bool bInHasWorldLocation,
+        const float InWorldRadiusCm)
+    {
+        if (MapTexture.Get() != InTexture)
+        {
+            MapTexture = InTexture;
+            MapBrush = FSlateBrush();
+            MapBrush.DrawAs = ESlateBrushDrawType::Image;
+            if (InTexture)
+            {
+                MapBrush.SetResourceObject(InTexture);
+                MapBrush.ImageSize = FVector2D(InTexture->GetSizeX(), InTexture->GetSizeY());
+            }
+        }
+        Calibration = InCalibration;
+        WorldLocation = InWorldLocation;
+        bHasWorldLocation = bInHasWorldLocation;
+        WorldRadiusCm = FMath::Max(1000.f, InWorldRadiusCm);
+        Invalidate(EInvalidateWidgetReason::Paint);
+    }
+
     virtual FVector2D ComputeDesiredSize(float) const override
     {
         return FVector2D(132.f, 132.f);
@@ -234,23 +269,94 @@ public:
     {
         const FVector2f Size = Geometry.GetLocalSize();
         const FVector2f C = Point(Size.X * .5f, Size.Y * .5f);
-        PaintArc(Geometry, List, Layer, C, 62.f, 0.f, 360.f, White(.055f), 1.f);
-        PaintArc(Geometry, List, Layer + 1, C, 62.f, -90.f, 360.f * (Timer / 100.f), Red(.72f), 1.5f);
-        PaintArc(Geometry, List, Layer + 2, C, 58.f, 0.f, 360.f, White(.12f), 1.f);
+        const float MapRadiusPx = 57.f;
 
-        // Sparse road hints are a style placeholder, NOT georeferenced streets.
-        // Rotate the little street grid around the fixed player marker.
-        const float Angle = FMath::DegreesToRadians(-Heading);
-        const auto Rotate = [C, Angle](const float X, const float Y)
+        const UStaticMeshComponent* Component = Calibration.Get();
+        const UStaticMesh* Mesh = Component ? Component->GetStaticMesh() : nullptr;
+        const UTexture2D* Texture = MapTexture.Get();
+
+        if (Texture && MapBrush.GetResourceObject() && Mesh && bHasWorldLocation)
         {
-            return C + Point(X * FMath::Cos(Angle) - Y * FMath::Sin(Angle),
-                X * FMath::Sin(Angle) + Y * FMath::Cos(Angle));
-        };
-        PaintLine(Geometry, List, Layer + 3, Rotate(-30.f, -49.f), Rotate(22.f, 45.f), White(.10f), 2.f);
-        PaintLine(Geometry, List, Layer + 3, Rotate(-48.f, 10.f), Rotate(45.f, -14.f), White(.08f), 2.f);
-        PaintLine(Geometry, List, Layer + 3, Rotate(-18.f, 47.f), Rotate(37.f, -34.f), White(.07f), 2.f);
+            const FBox Bounds = Mesh->GetBoundingBox();
+            const FVector Extents = Bounds.GetSize();
+            const FTransform Transform = Component->GetComponentTransform();
+            const FVector Scale = Transform.GetScale3D();
+            if (Bounds.IsValid && Extents.X > KINDA_SMALL_NUMBER
+                && Extents.Y > KINDA_SMALL_NUMBER
+                && FMath::Abs(Scale.X) > KINDA_SMALL_NUMBER
+                && FMath::Abs(Scale.Y) > KINDA_SMALL_NUMBER)
+            {
+                // Match menu WorldToUv: mesh-local X/Y normalized by the
+                // actual plane bounds (not world origins or assumed offsets).
+                const FVector Local = Transform.InverseTransformPosition(WorldLocation);
+                const FVector2f UvCenter(
+                    static_cast<float>((Local.X - Bounds.Min.X) / Extents.X),
+                    static_cast<float>((Local.Y - Bounds.Min.Y) / Extents.Y));
 
-        // Fixed player triangle (forward points up).
+                // UE yaw 0 faces +X. Map-local +X points right and +Y down.
+                // Rotate the map so the forward vector points toward -screen Y.
+                // Using the calibration's rotation handles rotated map planes.
+                const FVector ForwardLocal = Transform.InverseTransformVectorNoScale(
+                    FRotator(0.f, Heading, 0.f).Vector());
+                const float ForwardAngle = FMath::Atan2(ForwardLocal.Y, ForwardLocal.X);
+                const float MapRotation = -HALF_PI - ForwardAngle;
+                const float CosA = FMath::Cos(MapRotation);
+                const float SinA = FMath::Sin(MapRotation);
+                const float CmPerPixel = WorldRadiusCm / MapRadiusPx;
+                const float UPerPx = CmPerPixel / static_cast<float>(Scale.X * Extents.X);
+                const float VPerPx = CmPerPixel / static_cast<float>(Scale.Y * Extents.Y);
+
+                constexpr int32 Segments = 96;
+                TArray<FSlateVertex> Vertices;
+                TArray<SlateIndex> Indices;
+                Vertices.Reserve(Segments + 2);
+                Indices.Reserve(Segments * 3);
+
+                const auto AddVertex = [&](const FVector2f& Position)
+                {
+                    const FVector2f Delta = Position - C;
+                    // Inverse screen rotation -> calibration-local position.
+                    const float LocalX = CosA * Delta.X + SinA * Delta.Y;
+                    const float LocalY = -SinA * Delta.X + CosA * Delta.Y;
+                    const FVector2f UV(
+                        FMath::Clamp(UvCenter.X + LocalX * UPerPx, 0.f, 1.f),
+                        FMath::Clamp(UvCenter.Y + LocalY * VPerPx, 0.f, 1.f));
+                    Vertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+                        Geometry.GetAccumulatedRenderTransform(), Position, UV,
+                        FColor(255, 255, 255, 180), FColor::Transparent));
+                };
+
+                AddVertex(C);
+                for (int32 Index = 0; Index <= Segments; ++Index)
+                {
+                    const float Angle = 2.f * PI * static_cast<float>(Index) / Segments;
+                    AddVertex(C + Point(FMath::Cos(Angle) * MapRadiusPx,
+                        FMath::Sin(Angle) * MapRadiusPx));
+                    if (Index > 0)
+                    {
+                        Indices.Add(0);
+                        Indices.Add(static_cast<SlateIndex>(Index));
+                        Indices.Add(static_cast<SlateIndex>(Index + 1));
+                    }
+                }
+
+                // Unlike painting a texture square behind an overlay, this
+                // mesh never emits pixels outside the circular radar.
+                const FSlateResourceHandle Resource =
+                    FSlateApplication::Get().GetRenderer()->GetResourceHandle(MapBrush);
+                FSlateDrawElement::MakeCustomVerts(List, Layer, Resource,
+                    Vertices, Indices, nullptr, 0, 0, ESlateDrawEffect::None);
+            }
+        }
+
+        // Readable radar chrome, including the fallback when the map texture
+        // or MapContext actor has not been streamed yet.
+        PaintArc(Geometry, List, Layer + 1, C, 62.f, 0.f, 360.f, White(.055f), 1.f);
+        PaintArc(Geometry, List, Layer + 2, C, 62.f, -90.f,
+            360.f * (Timer / 100.f), Red(.72f), 1.5f);
+        PaintArc(Geometry, List, Layer + 3, C, 58.f, 0.f, 360.f, White(.12f), 1.f);
+
+        // Fixed triangular vehicle indicator, always facing up.
         PaintLine(Geometry, List, Layer + 4, C + Point(0.f, -7.f),
             C + Point(-4.5f, 5.f), White(.62f), 1.5f);
         PaintLine(Geometry, List, Layer + 4, C + Point(-4.5f, 5.f),
@@ -258,17 +364,25 @@ public:
         PaintLine(Geometry, List, Layer + 4, C + Point(4.5f, 5.f),
             C + Point(0.f, -7.f), White(.62f), 1.5f);
 
-        const float TargetRad = FMath::DegreesToRadians(Target - Heading - 90.f);
-        const FVector2f Indicator = C + Point(FMath::Cos(TargetRad) * 51.f,
-            FMath::Sin(TargetRad) * 51.f);
-        PaintRect(Geometry, List, Layer + 5, Indicator - Point(2.f, 2.f), Point(4.f, 4.f), Red(.82f));
+        // The authored target bearing remains relative to vehicle heading.
+        const float TargetRadians = FMath::DegreesToRadians(Target - Heading - 90.f);
+        const FVector2f Indicator = C + Point(FMath::Cos(TargetRadians) * 51.f,
+            FMath::Sin(TargetRadians) * 51.f);
+        PaintRect(Geometry, List, Layer + 5, Indicator - Point(2.f, 2.f),
+            Point(4.f, 4.f), Red(.82f));
         return Layer + 6;
     }
 
 private:
+    FSlateBrush MapBrush;
+    TWeakObjectPtr<UTexture2D> MapTexture;
+    TWeakObjectPtr<UStaticMeshComponent> Calibration;
+    FVector WorldLocation = FVector::ZeroVector;
     float Heading = 38.f;
     float Target = 72.f;
     float Timer = 68.f;
+    float WorldRadiusCm = 14000.f;
+    bool bHasWorldLocation = false;
 };
 
 TSharedRef<SWidget> UJaguarHUDRootWidget::RebuildWidget()
@@ -514,6 +628,62 @@ void UJaguarHUDRootWidget::RefreshCharacterHUD()
     }
 }
 
+void UJaguarHUDRootWidget::SetRadarMapSources(
+    UTexture2D* Texture, UStaticMeshComponent* Calibration)
+{
+    // Passing both nullptr returns to automatic sharing with the menu.
+    bRadarMapExplicit = Texture != nullptr && IsValid(Calibration);
+    RadarMapTexture = bRadarMapExplicit ? Texture : nullptr;
+    RadarMapCalibration = bRadarMapExplicit ? Calibration : nullptr;
+    RadarAutoBindCooldown = 0.f;
+    RefreshRadarMap();
+}
+
+void UJaguarHUDRootWidget::SetRadarTrackedActor(AActor* Actor)
+{
+    // This is a weak ref: the HUD must not extend the vehicle's lifetime.
+    RadarTrackedActor = Actor;
+    RefreshRadarMap();
+}
+
+void UJaguarHUDRootWidget::TryAutoBindRadarMap()
+{
+    if (bRadarMapExplicit) return;
+    if (!RadarMapTexture)
+    {
+        if (AJaguarPlayerController* Controller = Cast<AJaguarPlayerController>(GetOwningPlayer()))
+        {
+            RadarMapTexture = Controller->GetTimelineMapTexture();
+        }
+    }
+    if (RadarMapCalibration.IsValid() || !GetWorld()) return;
+
+    // Same MapContext contract as the native pause menu: exactly one
+    // authored actor with a valid static-mesh calibration plane.
+    TArray<AActor*> Candidates;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("Jaguar.MapContext")), Candidates);
+    if (Candidates.Num() != 1) return;
+
+    UStaticMeshComponent* Plane = Candidates[0]->FindComponentByClass<UStaticMeshComponent>();
+    const UStaticMesh* Mesh = Plane ? Plane->GetStaticMesh() : nullptr;
+    if (!Mesh) return;
+    const FBox Bounds = Mesh->GetBoundingBox();
+    if (!Bounds.IsValid || Bounds.GetSize().X <= KINDA_SMALL_NUMBER
+        || Bounds.GetSize().Y <= KINDA_SMALL_NUMBER) return;
+    RadarMapCalibration = Plane;
+}
+
+void UJaguarHUDRootWidget::RefreshRadarMap()
+{
+    if (!RadarPainter.IsValid()) return;
+
+    const AActor* Focus = RadarTrackedActor.Get();
+    if (!Focus) Focus = GetOwningPlayerPawn();
+    RadarPainter->SetMapState(RadarMapTexture, RadarMapCalibration.Get(),
+        Focus ? Focus->GetActorLocation() : FVector::ZeroVector,
+        Focus != nullptr, RadarWorldRadiusCm);
+}
+
 void UJaguarHUDRootWidget::SetVehicleHUD(const FJaguarHUDVehicleData& NewData)
 {
     VehicleData = NewData;
@@ -565,6 +735,7 @@ void UJaguarHUDRootWidget::RefreshVehicleHUD()
     {
         RadarPainter->SetState(VehicleData.HeadingDegrees,
             VehicleData.TargetDirectionDegrees, VehicleData.TimerPercent);
+        RefreshRadarMap();
     }
 }
 
@@ -603,6 +774,23 @@ void UJaguarHUDRootWidget::NativeTick(const FGeometry& MyGeometry, const float I
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
     const float DeltaTime = FMath::Max(0.f, InDeltaTime);
+
+    if (Presentation == EJaguarHUDPresentation::Vehicle)
+    {
+        if (!bRadarMapExplicit &&
+            (!RadarMapTexture || !RadarMapCalibration.IsValid()))
+        {
+            RadarAutoBindCooldown -= DeltaTime;
+            if (RadarAutoBindCooldown <= 0.f)
+            {
+                RadarAutoBindCooldown = 1.f;
+                TryAutoBindRadarMap();
+            }
+        }
+        // Re-center on the tracked vehicle even if telemetry updates
+        // less frequently than the widget's paint/tick cadence.
+        RefreshRadarMap();
+    }
 
     const float TargetHealthAlpha = CharacterData.Health < 98.f ? 1.f : 0.f;
     const float TargetStaminaAlpha = CharacterData.Stamina < 98.f ? 1.f : 0.f;
