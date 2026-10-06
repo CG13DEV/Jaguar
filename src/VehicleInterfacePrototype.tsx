@@ -210,31 +210,34 @@ function PrimaryReadout({
   const rpmDanger = rpm >= 84;
 
   return (
-    <div className="grid h-[48px] w-max grid-cols-[24px_max-content] items-center gap-x-[12px]">
-      <motion.div
-        key={gear}
-        initial={{ opacity: 0, y: -3 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.1 }}
-        className="flex h-full w-[24px] items-center justify-center font-mono text-[39px] font-light leading-none text-white/76"
-      >
-        {gear}
-      </motion.div>
+    <div className="grid h-[54px] w-max grid-cols-[22px_max-content] items-end gap-x-[10px]">
+      <div className="flex h-full w-[22px] flex-col items-center justify-end pb-[2px] font-mono">
+        <span className="mb-[4px] text-[5px] uppercase tracking-[0.12em] text-white/14">gear</span>
+        <motion.span
+          key={gear}
+          initial={{ opacity: 0, y: -2 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.1 }}
+          className="text-[21px] font-light leading-none text-white/58"
+        >
+          {gear}
+        </motion.span>
+      </div>
 
-      <div className="flex h-full w-max flex-col items-end justify-center">
+      <div className="flex h-full w-max flex-col items-end justify-end">
         <div className="relative w-max whitespace-nowrap font-mono">
           <div aria-hidden="true" className="invisible flex items-baseline gap-[6px]">
-            <span className="text-[21px] font-light leading-none">220</span>
+            <span className="text-[32px] font-light leading-none">220</span>
             <span className="text-[6px] uppercase tracking-[0.06em]">km/h</span>
           </div>
 
           <div className="absolute inset-0 flex items-baseline justify-end gap-[6px]">
-            <span className="text-[21px] font-light leading-none text-white/60">{speed}</span>
-            <span className="text-[6px] uppercase tracking-[0.06em] text-white/16">km/h</span>
+            <span className="text-[32px] font-light leading-none text-white/72">{speed}</span>
+            <span className="text-[6px] uppercase tracking-[0.06em] text-white/18">km/h</span>
           </div>
         </div>
 
-        <div className="mt-[6px] w-full">
+        <div className="mt-[5px] w-full">
           <div className="mb-[3px] flex w-full items-center justify-between font-mono text-[6px] uppercase tracking-[0.1em] text-white/16">
             <span>rpm</span>
             <span>{rpm}</span>
